@@ -1,6 +1,8 @@
 package com.kryptoeuro.accountmapper;
 
+import com.codeborne.security.mobileid.MobileIDSession;
 import com.kryptoeuro.accountmapper.domain.EthereumAccount;
+import com.kryptoeuro.accountmapper.mobileid.MobileIdAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -16,6 +18,8 @@ public class AccountMapperApplication {
 
     @Autowired
     EthereumAccountRepository ethereumAccountRepository;
+    @Autowired
+    MobileIdAuthService mobileIdAuthService;
 
 	public static void main(String[] args) {
 		SpringApplication.run(AccountMapperApplication.class, args);
@@ -36,5 +40,11 @@ public class AccountMapperApplication {
     @RequestMapping(value = "/account/list")
     public List<EthereumAccount> listAccounts(@RequestParam(name = "ownerId") String ownerId) {
         return ethereumAccountRepository.findByOwnerId(ownerId);
+    }
+
+    @RequestMapping(value = "/test/mobileid")
+    public String testMobileIdLogin(@RequestParam(name = "mobileNumber") String mobileNumber) {
+        MobileIDSession mobileIDlogin = mobileIdAuthService.login(mobileNumber);
+        return "FirstName: " + mobileIDlogin.firstName + "\nLastName: " + mobileIDlogin.lastName + "\nID: " + mobileIDlogin.personalCode;
     }
 }
