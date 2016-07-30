@@ -22,7 +22,7 @@ public class AccountManagementService {
 	public void storeNewAccount(String address, String ownerId) throws CannotStoreAccountException {
 		try {
 			validateAccountStoring(address, ownerId);
-			EthereumAccount account = new EthereumAccount(address, ownerId);
+			EthereumAccount account = new EthereumAccount(ownerId, address);
 			ethereumAccountRepository.save(account);
 		} catch (CannotStoreAccountException e) {
 			throw e;
