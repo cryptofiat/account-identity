@@ -1,5 +1,6 @@
 package com.kryptoeuro.accountmapper.rest;
 
+import com.codeborne.security.mobileid.MobileIDSession;
 import com.kryptoeuro.accountmapper.EthereumAccountRepository;
 import com.kryptoeuro.accountmapper.command.AuthenticateCommand;
 import com.kryptoeuro.accountmapper.domain.EthereumAccount;
@@ -38,13 +39,13 @@ public class AccountMapperController {
 			value = "/authenticate/",
 			consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<AuthenticateResponse> authenticate(@Valid @RequestBody AuthenticateCommand authenticateCommand, HttpSession session) {
-		// start mobile auth
-		// save MobileIDSession in HTTP session
-		// save address in HTTP session
+		// start mobile id auth
+		MobileIDSession mobileIDSession = mobileIdAuthService.startLogin(authenticateCommand.getPhoneNumber());
+		// save MobileIDSession and account address in HTTP session
+		session.setAttribute("mobileIDSession", mobileIDSession);
 		session.setAttribute("address", authenticateCommand.getAccountAddress());
-		// return MobileIDSession.challenge;
-
-		AuthenticateResponse authenticateResponse = new AuthenticateResponse("1337");
+		// return challenge;
+		AuthenticateResponse authenticateResponse = new AuthenticateResponse(mobileIDSession.challenge);
 		return new ResponseEntity<AuthenticateResponse>(authenticateResponse, HttpStatus.OK);
 	}
 
