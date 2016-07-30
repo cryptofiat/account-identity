@@ -69,13 +69,12 @@ public class AccountMapperController {
 
 		if (mobileIDSession == null || accountAddress == null) {
 			return new ResponseEntity<PollResponse>(new PollResponse(PollResponseStatus.LOGIN_FAILURE), HttpStatus.OK);
-
 		}
 
 		// Check if authenticated
 		boolean isAuthenticated = mobileIdAuthService.isLoginComplete(mobileIDSession);
 		if (!isAuthenticated) {
-			new ResponseEntity<PollResponse>(new PollResponse(PollResponseStatus.LOGIN_PENDING), HttpStatus.OK);
+			return new ResponseEntity<PollResponse>(new PollResponse(PollResponseStatus.LOGIN_PENDING), HttpStatus.OK);
 		}
 
 		try {
