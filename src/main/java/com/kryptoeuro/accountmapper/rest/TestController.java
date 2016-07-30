@@ -1,7 +1,7 @@
 package com.kryptoeuro.accountmapper.rest;
 
 import com.codeborne.security.mobileid.MobileIDSession;
-import com.kryptoeuro.accountmapper.mobileid.MobileIdAuthService;
+import com.kryptoeuro.accountmapper.service.MobileIdAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;

@@ -1,4 +1,4 @@
-package com.kryptoeuro.accountmapper.mobileid;
+package com.kryptoeuro.accountmapper.service;
 
 import com.codeborne.security.AuthenticationException;
 import com.codeborne.security.mobileid.MobileIDAuthenticator;
@@ -50,6 +50,4 @@ public class MobileIdAuthService {
 	public boolean isLoginComplete(MobileIDSession mobileIDSession) {
 		return mid.isLoginComplete(mobileIDSession);
 	}
-
-
 }
