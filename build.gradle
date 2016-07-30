@@ -32,7 +32,7 @@ dependencies {
 	compile('org.springframework.boot:spring-boot-starter-data-jpa')
 	compile('org.springframework.boot:spring-boot-starter-web')
 	compile('com.codeborne:mobileid:1.1')
-	runtime('org.apache.derby:derby')
+	compile("com.h2database:h2")
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 }
 
