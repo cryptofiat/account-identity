@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MobileIdAuthService {
 
 	private static final String TEST_DIGIDOC_SERVICE_URL = "https://tsp.demo.sk.ee/";
-	private static final String KEYSTORE_PATH = "path/to/keystore.jks";
+	private static final String KEYSTORE_PATH = "test_keys/keystore.jks";
 	private MobileIDAuthenticator mid = new MobileIDAuthenticator(TEST_DIGIDOC_SERVICE_URL);
 
 	public MobileIdAuthService() {

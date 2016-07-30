@@ -42,7 +42,7 @@ public class AccountMapperApplication {
         return ethereumAccountRepository.findByOwnerId(ownerId);
     }
 
-//  Use +37260000007 for testing
+//  Use 60000007 for testing
     @RequestMapping(value = "/test/mobileid")
     public String testMobileIdLogin(@RequestParam(name = "mobileNumber") String mobileNumber) {
         MobileIDSession mobileIDlogin = mobileIdAuthService.login(mobileNumber);
