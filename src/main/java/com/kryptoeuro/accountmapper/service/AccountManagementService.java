@@ -20,8 +20,23 @@ public class AccountManagementService {
 	EthereumAccountRepository ethereumAccountRepository;
 
 	public void storeNewAccount(String address, String ownerId) throws CannotStoreAccountException {
-		EthereumAccount account = new EthereumAccount(address, ownerId);
-		ethereumAccountRepository.save(account);
+		try {
+			validateAccountStoring(address, ownerId);
+			EthereumAccount account = new EthereumAccount(address, ownerId);
+			ethereumAccountRepository.save(account);
+		} catch (CannotStoreAccountException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new CannotStoreAccountException("Crashed while storing new account", e.getCause());
+		}
+	}
+
+	private void validateAccountStoring(String address, String ownerId) throws CannotStoreAccountException {
+		if (address == null) throw new CannotStoreAccountException("Address undefined");
+		if (ownerId == null) throw new CannotStoreAccountException("OwnerId undefined");
+		//better be solved by domain object uniqueness constraint
+		if (getAccountsByAccountAddress(address).size() > 0) throw new CannotStoreAccountException("Account already in system");
+
 	}
 
 	public List<EthereumAccount> getAccountsByOwnerId(String ownerId) {
