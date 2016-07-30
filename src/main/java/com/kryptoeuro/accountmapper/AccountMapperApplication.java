@@ -1,6 +1,5 @@
 package com.kryptoeuro.accountmapper;
 
-import com.codeborne.security.mobileid.MobileIDSession;
 import com.kryptoeuro.accountmapper.domain.EthereumAccount;
 import com.kryptoeuro.accountmapper.mobileid.MobileIdAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpSession;
 import java.util.List;
 
 @SpringBootApplication
@@ -57,30 +55,5 @@ public class AccountMapperApplication {
     @RequestMapping(value = "/account/list")
     public List<EthereumAccount> listAccounts(@RequestParam(name = "ownerId") String ownerId) {
         return ethereumAccountRepository.findByOwnerId(ownerId);
-    }
-
-//  Use 60000007 for testing
-    @RequestMapping(value = "/test/mobileid")
-    public String testMobileIdLogin(@RequestParam(name = "mobileNumber") String mobileNumber) {
-        MobileIDSession mobileIDlogin = mobileIdAuthService.login(mobileNumber);
-
-        return mobileIDlogin != null
-                ? "FirstName: " + mobileIDlogin.firstName +
-                    "\nLastName: " + mobileIDlogin.lastName +
-                    "\nID: " + mobileIDlogin.personalCode
-                : "Could not login";
-    }
-
-    @RequestMapping(value = "/test/addToSession")
-    public String addToSession(@RequestParam(name = "objectValue") String value, HttpSession httpSession) {
-        httpSession.removeAttribute("sessionObject");
-        httpSession.setAttribute("sessionObject", value);
-        return "OK";
-    }
-
-    @RequestMapping(value = "/test/getFromSession")
-    public String getFromSession(HttpSession httpSession) {
-        Object value = httpSession.getAttribute("sessionObject");
-        return value != null ? value.toString() : "Value has not found in session. Use /test/addToSession?sessionObject=yourvalue to add it.";
     }
 }
