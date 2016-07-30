@@ -30,10 +30,11 @@ public class AccountMapperApplication {
     }
 
     @RequestMapping(value = "/authenticate")
-    public String authenticate(@RequestParam(name = "address") String address, @RequestParam(name = "phoneNumber") String phoneNumber) {
+    public String authenticate(@RequestParam(name = "address") String address, @RequestParam(name = "phoneNumber") String phoneNumber, HttpSession session) {
         // start mobile auth
         // save MobileIDSession in HTTP session
         // save address in HTTP session
+        session.setAttribute("address", address);
         // return MobileIDSession.challenge;
         return "";
     }
