@@ -8,4 +8,5 @@ import java.util.List;
 public interface EthereumAccountRepository extends CrudRepository<EthereumAccount,Long> {
 
     List<EthereumAccount> findByOwnerId(String ownerId);
+    List<EthereumAccount> findByAddress(String accountAddress);
 }
