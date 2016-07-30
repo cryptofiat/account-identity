@@ -20,7 +20,7 @@ public class TestController {
 //  https://demo.sk.ee/MIDCertsReg/index.php <- register your phone number here
     @RequestMapping(value = "/mobileid")
     public String testMobileIdLogin(@RequestParam(name = "mobileNumber") String mobileNumber) {
-        MobileIDSession mobileIDlogin = mobileIdAuthService.login(mobileNumber);
+        MobileIDSession mobileIDlogin = mobileIdAuthService.fullLogin(mobileNumber);
 
         return mobileIDlogin != null
                 ? "FirstName: " + mobileIDlogin.firstName +

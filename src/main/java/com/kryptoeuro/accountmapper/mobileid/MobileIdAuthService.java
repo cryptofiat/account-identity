@@ -20,13 +20,11 @@ public class MobileIdAuthService {
 		System.setProperty("javax.net.ssl.trustStore", KEYSTORE_PATH);
 	}
 
-	public MobileIDSession login(String phoneNumber) {
+	public MobileIDSession fullLogin(String phoneNumber) {
 		MobileIDSession mobileIDSession;
 		try {
-			mobileIDSession = mid.startLogin(phoneNumber);
-			log.debug("Mobile ID authentication with challenge " + mobileIDSession.challenge + " sent to " + phoneNumber);
-			mid.waitForLogin(mobileIDSession);
-			log.debug("Mobile ID authentication success! First name: " + mobileIDSession.firstName + ", Last name: " + mobileIDSession.lastName + ", Personal code: " + mobileIDSession.personalCode);
+			mobileIDSession = startLogin(phoneNumber);
+			waitForLogin(mobileIDSession);
 		} catch (AuthenticationException e) {
 			e.printStackTrace();
 			log.debug("Mobile ID authentication failed" + e.getMessage());
@@ -36,6 +34,22 @@ public class MobileIdAuthService {
 		return mobileIDSession;
 	}
 
+	public MobileIDSession startLogin(String phoneNumber) {
+		MobileIDSession mobileIDSession = mid.startLogin(phoneNumber);
+		log.debug("Mobile ID authentication with challenge " + mobileIDSession.challenge + " sent to " + phoneNumber);
+		return mobileIDSession;
+	}
+
+	public MobileIDSession waitForLogin(MobileIDSession mobileIDSession) {
+		log.debug("Waiting for mobile ID login: " + mobileIDSession.sessCode);
+		mid.waitForLogin(mobileIDSession);
+		log.debug("Mobile ID authentication success! First name: " + mobileIDSession.firstName + ", Last name: " + mobileIDSession.lastName + ", Personal code: " + mobileIDSession.personalCode);
+		return mobileIDSession;
+	}
+
+	public boolean isLoginComplete(MobileIDSession mobileIDSession) {
+		return mid.isLoginComplete(mobileIDSession);
+	}
 
 
 }
