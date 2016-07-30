@@ -1,4 +1,4 @@
-package com.kryptoeuro.accountmapper.playground;
+package com.kryptoeuro.accountmapper.rest;
 
 import com.codeborne.security.mobileid.MobileIDSession;
 import com.kryptoeuro.accountmapper.mobileid.MobileIdAuthService;
