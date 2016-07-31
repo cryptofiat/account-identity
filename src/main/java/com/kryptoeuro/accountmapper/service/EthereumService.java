@@ -10,11 +10,14 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.ethereum.core.CallTransaction.Function;
 import org.ethereum.core.Transaction;
+import org.ethereum.crypto.ECKey;
 import org.ethereum.util.ByteUtil;
 import org.spongycastle.util.encoders.Hex;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Scanner;
@@ -37,7 +40,9 @@ public class EthereumService {
 	public void activateEthereumAccount(String accountAddress) throws IOException {
 		accountAddress = with0x(accountAddress);
 
-		long transactionCount = getTransactionCount(with0x(getAccountApproverAddress()));
+		ECKey approver = getAccountApproverKey();
+
+		long transactionCount = getTransactionCount(hex(approver.getAddress()));
 		byte[] nonce = ByteUtil.longToBytesNoLeadZeroes(transactionCount);
 
 		byte[] gasPrice = ByteUtil.longToBytesNoLeadZeroes(30000000000L);
@@ -47,18 +52,26 @@ public class EthereumService {
 		byte[] callData = approveFunction.encode(accountAddress, true);
 
 		Transaction transaction = new Transaction(nonce, gasPrice, gasLimit, toAddress, null, callData);
-		transaction.sign(getAccountApproverPrivateKey());
+		//noinspection ConstantConditions
+		transaction.sign(approver.getPrivKeyBytes());
 
-		String txHash = send(json("eth_sendRawTransaction", with0x(Hex.toHexString(transaction.getEncoded()))));
+		String txHash = send(json("eth_sendRawTransaction", hex(transaction.getEncoded())));
 		log.info("Account " + accountAddress + " approved. TxHash=" + txHash);
 	}
 
-	private byte[] getAccountApproverPrivateKey() {
-		return Hex.decode("71e2dc69c297ffdd8fe2ef86b4225ebe27b3d259e25e94a2c45f2e29a97d84f0");
+	private String hex(byte[] bytes) {
+		return with0x(Hex.toHexString(bytes));
 	}
 
-	private String getAccountApproverAddress() {
-		return "0x03e5403a7a733c3aa820d10a075df47ae73fa83a";
+	private ECKey getAccountApproverKey() throws IOException {
+		File file = new File(System.getProperty("user.home"), ".AccountApprover.key");
+		try {
+			String keyHex = toString(new FileInputStream(file));
+			return ECKey.fromPrivate(Hex.decode(keyHex));
+		}
+		catch (IOException e) {
+			throw new IOException("Cannot load account approver key. Make sure " + file.toString() + " exists and contains the private key in hex format.\n" + e.toString());
+		}
 	}
 
 	private long getTransactionCount(String account) throws IOException {
@@ -83,7 +96,7 @@ public class EthereumService {
 		if (response.getStatusLine().getStatusCode() != 200)
 			throw new IOException(response.getStatusLine().toString());
 		InputStream stream = response.getEntity().getContent();
-		return resultFromJson(new Scanner(stream).useDelimiter("\\A").next());
+		return resultFromJson(toString(stream));
 	}
 
 	private String resultFromJson(String json) throws IOException {
@@ -99,5 +112,11 @@ public class EthereumService {
 
 	private String with0x(String hex) {
 		return hex.startsWith("0x") ? hex : "0x" + hex;
+	}
+
+	private String toString(InputStream stream) throws IOException {
+		try (InputStream is = stream) {
+			return new Scanner(is).useDelimiter("\\A").next();
+		}
 	}
 }
