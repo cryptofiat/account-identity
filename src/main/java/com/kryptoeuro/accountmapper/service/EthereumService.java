@@ -35,13 +35,13 @@ public class EthereumService {
 	private String contractAddress = "0xAF8ce136A244dB6f13a97e157AC39169F4E9E445";
 	private String jsonRpcUrl = "http://54.194.239.231:8545";
 
-	private Function approveFunction = Function.fromSignature("approveAccount", "address");
+	private Function approveAccountFunction = Function.fromSignature("approveAccount", "address");
   private Function appointAccountApproverFunction = Function.fromSignature("appointAccountApprover", "address");
 
 	public void activateEthereumAccount(String accountAddress) throws IOException {
 		accountAddress = with0x(accountAddress);
 		ECKey approver = getAccountApproverKey();
-    String txHash = sendTransaction(approver, approveFunction.encode(accountAddress));
+    String txHash = sendTransaction(approver, approveAccountFunction.encode(accountAddress));
 		log.info("Account " + accountAddress + " approved by " + hex(approver.getAddress()) + ". TxHash=" + txHash);
 	}
 
