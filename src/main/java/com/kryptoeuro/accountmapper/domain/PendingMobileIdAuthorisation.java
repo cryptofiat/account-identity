@@ -7,7 +7,7 @@ public class PendingMobileIdAuthorisation {
 	public MobileIDSession mobileIdSession;
 	public String address;
 
-	public PendingMobileIdAuthorisation(MobileIDSession mobileIDSession, String address) {
+	public PendingMobileIdAuthorisation(MobileIDSession mobileIdSession, String address) {
 		this.mobileIdSession = mobileIdSession;
 		this.address = address;
 	}
