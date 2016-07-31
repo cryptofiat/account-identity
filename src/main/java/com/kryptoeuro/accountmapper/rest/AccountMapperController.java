@@ -80,6 +80,8 @@ public class AccountMapperController {
 		try {
 			accountManagementService.storeNewAccount(accountAddress, mobileIDSession.personalCode);
 			ethereumService.activateEthereumAccount(accountAddress);
+			httpSession.removeAttribute(HTTP_SESS_PAR_ADDRESS);
+			httpSession.removeAttribute(HTTP_SESS_PAR_IDSESSION);
 		} catch (Exception e) {
 			return new ResponseEntity<PollResponse>(new PollResponse(PollResponseStatus.LOGIN_FAILURE), HttpStatus.OK);
 		}
