@@ -6,9 +6,11 @@ import lombok.Data;
 @Data
 public class AuthenticateResponse {
 	String challengeCode;
+	String authIdentifier;
 
 	@Builder
-	public AuthenticateResponse(String challengeCode) {
+	public AuthenticateResponse(String challengeCode, String authIdentifier) {
 		this.challengeCode = challengeCode;
+		this.authIdentifier = authIdentifier;
 	}
 }

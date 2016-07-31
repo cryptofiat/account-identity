@@ -2,7 +2,9 @@ package com.kryptoeuro.accountmapper.rest;
 
 import com.codeborne.security.mobileid.MobileIDSession;
 import com.kryptoeuro.accountmapper.command.AuthenticateCommand;
+import com.kryptoeuro.accountmapper.command.PollCommand;
 import com.kryptoeuro.accountmapper.domain.EthereumAccount;
+import com.kryptoeuro.accountmapper.domain.PendingMobileIdAuthorisation;
 import com.kryptoeuro.accountmapper.response.AuthenticateResponse;
 import com.kryptoeuro.accountmapper.response.PollResponse;
 import com.kryptoeuro.accountmapper.service.AccountManagementService;
@@ -17,9 +19,10 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @RestController
@@ -41,6 +44,9 @@ public class AccountMapperController {
 		return "OK";
 	}
 
+	//Initial HttpSession approach did not work with marat's app. Will keep in memory here for now
+	private static Map<String, PendingMobileIdAuthorisation> pendingAuthorisations = new HashMap<String, PendingMobileIdAuthorisation>();
+
 	@RequestMapping(
 			method = POST,
 			value = "/authenticate",
@@ -48,21 +54,19 @@ public class AccountMapperController {
 	public ResponseEntity<AuthenticateResponse> authenticate(@Valid @RequestBody AuthenticateCommand authenticateCommand, HttpSession session) {
 		// start mobile id auth
 		MobileIDSession mobileIDSession = mobileIdAuthService.startLogin(authenticateCommand.getPhoneNumber());
-		// save MobileIDSession and account address in HTTP session
-		session.setAttribute(HTTP_SESS_PAR_IDSESSION, mobileIDSession);
-		session.setAttribute(HTTP_SESS_PAR_ADDRESS, authenticateCommand.getAccountAddress());
-		// return challenge;
-		AuthenticateResponse authenticateResponse = new AuthenticateResponse(mobileIDSession.challenge);
+		pendingAuthorisations.put(mobileIDSession.challenge, new PendingMobileIdAuthorisation(mobileIDSession, authenticateCommand.getAccountAddress()));
+		AuthenticateResponse authenticateResponse = new AuthenticateResponse(mobileIDSession.challenge, mobileIDSession.challenge); //todo change second parameter to unique identifier
 		return new ResponseEntity<AuthenticateResponse>(authenticateResponse, HttpStatus.OK);
 	}
 
 	@RequestMapping(
-			method = GET,
-			value = "/poll")
-	public ResponseEntity<PollResponse> poll(HttpSession httpSession) {
-		// get MobileIDSession from HTTP session
-		MobileIDSession mobileIDSession = (MobileIDSession) httpSession.getAttribute(HTTP_SESS_PAR_IDSESSION);
-		String accountAddress = (String) httpSession.getAttribute(HTTP_SESS_PAR_ADDRESS);
+			method = POST,
+			value = "/poll",
+			consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public ResponseEntity<PollResponse> poll(@Valid @RequestBody PollCommand pollCommand, HttpSession httpSession) {
+		PendingMobileIdAuthorisation pendingMobileIdAuthorisation = pendingAuthorisations.get(pollCommand.getAuthIdentifier());
+		MobileIDSession mobileIDSession = pendingMobileIdAuthorisation.mobileIdSession;
+		String accountAddress = pendingMobileIdAuthorisation.address;
 
 		if (mobileIDSession == null || accountAddress == null) {
 			return new ResponseEntity<PollResponse>(new PollResponse(PollResponseStatus.LOGIN_EXPIRED), HttpStatus.OK);
@@ -76,9 +80,9 @@ public class AccountMapperController {
 
 		try {
 			accountManagementService.storeNewAccount(accountAddress, mobileIDSession.personalCode);
-			httpSession.removeAttribute(HTTP_SESS_PAR_IDSESSION);
+			pendingMobileIdAuthorisation.mobileIdSession = null;
 			ethereumService.activateEthereumAccount(accountAddress);
-			httpSession.removeAttribute(HTTP_SESS_PAR_ADDRESS);
+			pendingMobileIdAuthorisation.address = null;
 		} catch (Exception e) {
 			return new ResponseEntity<PollResponse>(new PollResponse(PollResponseStatus.LOGIN_FAILURE), HttpStatus.OK);
 		}
