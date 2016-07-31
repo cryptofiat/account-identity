@@ -68,7 +68,7 @@ public class AccountMapperController {
 		String accountAddress = (String) httpSession.getAttribute(HTTP_SESS_PAR_ADDRESS);
 
 		if (mobileIDSession == null || accountAddress == null) {
-			return new ResponseEntity<PollResponse>(new PollResponse(PollResponseStatus.LOGIN_FAILURE), HttpStatus.OK);
+			return new ResponseEntity<PollResponse>(new PollResponse(PollResponseStatus.LOGIN_EXPIRED), HttpStatus.OK);
 		}
 
 		// Check if authenticated
@@ -79,9 +79,9 @@ public class AccountMapperController {
 
 		try {
 			accountManagementService.storeNewAccount(accountAddress, mobileIDSession.personalCode);
+			httpSession.removeAttribute(HTTP_SESS_PAR_IDSESSION);
 			ethereumService.activateEthereumAccount(accountAddress);
 			httpSession.removeAttribute(HTTP_SESS_PAR_ADDRESS);
-			httpSession.removeAttribute(HTTP_SESS_PAR_IDSESSION);
 		} catch (Exception e) {
 			return new ResponseEntity<PollResponse>(new PollResponse(PollResponseStatus.LOGIN_FAILURE), HttpStatus.OK);
 		}
