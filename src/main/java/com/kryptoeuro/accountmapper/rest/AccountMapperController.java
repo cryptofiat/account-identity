@@ -3,28 +3,24 @@ package com.kryptoeuro.accountmapper.rest;
 import com.codeborne.security.mobileid.MobileIDSession;
 import com.kryptoeuro.accountmapper.command.AuthenticateCommand;
 import com.kryptoeuro.accountmapper.domain.EthereumAccount;
+import com.kryptoeuro.accountmapper.response.AuthenticateResponse;
+import com.kryptoeuro.accountmapper.response.PollResponse;
 import com.kryptoeuro.accountmapper.service.AccountManagementService;
 import com.kryptoeuro.accountmapper.service.EthereumService;
 import com.kryptoeuro.accountmapper.service.MobileIdAuthService;
-import com.kryptoeuro.accountmapper.response.AuthenticateResponse;
-import com.kryptoeuro.accountmapper.response.PollResponse;
 import com.kryptoeuro.accountmapper.state.PollResponseStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import java.util.List;
 
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
-
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @RestController
 @RequestMapping("/v1")
@@ -44,6 +40,7 @@ public class AccountMapperController {
 		return "OK";
 	}
 
+	@CrossOrigin(origins = "*")
 	@RequestMapping(
 			method = POST,
 			value = "/authenticate",
@@ -68,7 +65,7 @@ public class AccountMapperController {
 		String accountAddress = (String) httpSession.getAttribute(HTTP_SESS_PAR_ADDRESS);
 
 		if (mobileIDSession == null || accountAddress == null) {
-			return new ResponseEntity<PollResponse>(new PollResponse(PollResponseStatus.LOGIN_FAILURE), HttpStatus.OK);
+			return new ResponseEntity<PollResponse>(new PollResponse(PollResponseStatus.LOGIN_EXPIRED), HttpStatus.OK);
 		}
 
 		// Check if authenticated
@@ -79,7 +76,9 @@ public class AccountMapperController {
 
 		try {
 			accountManagementService.storeNewAccount(accountAddress, mobileIDSession.personalCode);
+			httpSession.removeAttribute(HTTP_SESS_PAR_IDSESSION);
 			ethereumService.activateEthereumAccount(accountAddress);
+			httpSession.removeAttribute(HTTP_SESS_PAR_ADDRESS);
 		} catch (Exception e) {
 			return new ResponseEntity<PollResponse>(new PollResponse(PollResponseStatus.LOGIN_FAILURE), HttpStatus.OK);
 		}

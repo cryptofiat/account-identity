@@ -13,7 +13,6 @@ buildscript {
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'spring-boot'
-apply plugin: 'war'
 
 jar {
 	baseName = 'accountmapper'
@@ -24,14 +23,14 @@ targetCompatibility = 1.8
 
 repositories {
 	mavenCentral()
-  maven {url "http://dl.bintray.com/ethereum/maven"}
+	maven { url "http://dl.bintray.com/ethereum/maven" }
 }
 
 dependencies {
 	compile('org.springframework.boot:spring-boot-starter-actuator')
 	compile('org.springframework.boot:spring-boot-starter-jdbc')
 	compile('org.springframework.boot:spring-boot-starter-data-jpa')
-	providedCompile('org.springframework.boot:spring-boot-starter-web')
+	compile('org.springframework.boot:spring-boot-starter-web')
 	compile('com.codeborne:mobileid:1.1')
 	compile('com.h2database:h2')
 	compile('org.ethereum:ethereumj-core:1.1.0-RELEASE') {
