@@ -27,7 +27,7 @@ public class MobileIdAuthService {
 			waitForLogin(mobileIDSession);
 		} catch (AuthenticationException e) {
 			e.printStackTrace();
-			log.debug("Mobile ID authentication failed" + e.getMessage());
+			log.info("Mobile ID authentication failed" + e.getMessage());
 			return null;
 		}
 
@@ -36,14 +36,14 @@ public class MobileIdAuthService {
 
 	public MobileIDSession startLogin(String phoneNumber) {
 		MobileIDSession mobileIDSession = mid.startLogin(phoneNumber);
-		log.debug("Mobile ID authentication with challenge " + mobileIDSession.challenge + " sent to " + phoneNumber);
+		log.info("Mobile ID authentication with challenge " + mobileIDSession.challenge + " sent to " + phoneNumber);
 		return mobileIDSession;
 	}
 
 	public MobileIDSession waitForLogin(MobileIDSession mobileIDSession) {
-		log.debug("Waiting for mobile ID login: " + mobileIDSession.sessCode);
+		log.info("Waiting for mobile ID login: " + mobileIDSession.sessCode);
 		mid.waitForLogin(mobileIDSession);
-		log.debug("Mobile ID authentication success! First name: " + mobileIDSession.firstName + ", Last name: " + mobileIDSession.lastName + ", Personal code: " + mobileIDSession.personalCode);
+		log.info("Mobile ID authentication success! First name: " + mobileIDSession.firstName + ", Last name: " + mobileIDSession.lastName + ", Personal code: " + mobileIDSession.personalCode);
 		return mobileIDSession;
 	}
 
