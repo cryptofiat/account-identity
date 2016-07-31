@@ -24,6 +24,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @RestController
 @RequestMapping("/v1")
+@CrossOrigin(origins = "*")
 public class AccountMapperController {
 	@Autowired
 	MobileIdAuthService mobileIdAuthService;
@@ -40,7 +41,6 @@ public class AccountMapperController {
 		return "OK";
 	}
 
-	@CrossOrigin(origins = "*")
 	@RequestMapping(
 			method = POST,
 			value = "/authenticate",
