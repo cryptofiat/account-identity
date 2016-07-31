@@ -17,7 +17,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.List;
@@ -36,9 +35,6 @@ public class AccountMapperController {
 	@Autowired
 	AccountManagementService accountManagementService;
 
-	private static final String HTTP_SESS_PAR_IDSESSION = "mobileIDSession";
-	private static final String HTTP_SESS_PAR_ADDRESS = "address";
-
 	@RequestMapping(value = "/", produces = "text/plain")
 	public String index() {
 		return "OK";
@@ -51,10 +47,12 @@ public class AccountMapperController {
 			method = POST,
 			value = "/authenticate",
 			consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public ResponseEntity<AuthenticateResponse> authenticate(@Valid @RequestBody AuthenticateCommand authenticateCommand, HttpSession session) {
+	public ResponseEntity<AuthenticateResponse> authenticate(@Valid @RequestBody AuthenticateCommand authenticateCommand) {
 		// start mobile id auth
 		MobileIDSession mobileIDSession = mobileIdAuthService.startLogin(authenticateCommand.getPhoneNumber());
+
 		pendingAuthorisations.put(mobileIDSession.challenge, new PendingMobileIdAuthorisation(mobileIDSession, authenticateCommand.getAccountAddress()));
+
 		AuthenticateResponse authenticateResponse = new AuthenticateResponse(mobileIDSession.challenge, mobileIDSession.challenge); //todo change second parameter to unique identifier
 		return new ResponseEntity<AuthenticateResponse>(authenticateResponse, HttpStatus.OK);
 	}
@@ -63,8 +61,13 @@ public class AccountMapperController {
 			method = POST,
 			value = "/poll",
 			consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public ResponseEntity<PollResponse> poll(@Valid @RequestBody PollCommand pollCommand, HttpSession httpSession) {
+	public ResponseEntity<PollResponse> poll(@Valid @RequestBody PollCommand pollCommand) {
 		PendingMobileIdAuthorisation pendingMobileIdAuthorisation = pendingAuthorisations.get(pollCommand.getAuthIdentifier());
+
+		if (pendingMobileIdAuthorisation == null) {
+			return new ResponseEntity<PollResponse>(new PollResponse(PollResponseStatus.LOGIN_EXPIRED), HttpStatus.OK);
+		}
+
 		MobileIDSession mobileIDSession = pendingMobileIdAuthorisation.mobileIdSession;
 		String accountAddress = pendingMobileIdAuthorisation.address;
 
