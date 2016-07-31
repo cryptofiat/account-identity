@@ -56,8 +56,29 @@ public class EthereumService {
 		transaction.sign(approver.getPrivKeyBytes());
 
 		String txHash = send(json("eth_sendRawTransaction", hex(transaction.getEncoded())));
-		log.info("Account " + accountAddress + " approved. TxHash=" + txHash);
+		log.info("Account " + accountAddress + " approved by " + hex(approver.getAddress()) + ". TxHash=" + txHash);
 	}
+
+	public void transferAccountApprovalRight(String newAddress) throws IOException {
+    newAddress = with0x(newAddress);
+    ECKey approver = getAccountApproverKey();
+
+    long transactionCount = getTransactionCount(hex(approver.getAddress()));
+    byte[] nonce = ByteUtil.longToBytesNoLeadZeroes(transactionCount);
+
+    byte[] gasPrice = ByteUtil.longToBytesNoLeadZeroes(30000000000L);
+    byte[] gasLimit = ByteUtil.longToBytesNoLeadZeroes(200000);
+
+    byte[] toAddress = Hex.decode(without0x(contractAddress));
+    byte[] callData = Function.fromSignature("transferLawEnforcement", "address").encode(newAddress);
+
+    Transaction transaction = new Transaction(nonce, gasPrice, gasLimit, toAddress, null, callData);
+    //noinspection ConstantConditions
+    transaction.sign(approver.getPrivKeyBytes());
+
+    String txHash = send(json("eth_sendRawTransaction", hex(transaction.getEncoded())));
+    log.info("Account approval right transferred to " + newAddress + ". You must change your account approver key file accordingly. TxHash=" + txHash);
+  }
 
 	private String hex(byte[] bytes) {
 		return with0x(Hex.toHexString(bytes));
@@ -103,7 +124,11 @@ public class EthereumService {
 		JsonNode jsonNode = new ObjectMapper().readTree(json);
 		if (!jsonNode.get("jsonrpc").asText().equals("2.0"))
 			throw new IOException("Unknown json response: " + json);
-		return jsonNode.get("result").asText();
+    if (jsonNode.has("error"))
+      throw new IOException(jsonNode.get("error").get("message").asText());
+    if (!jsonNode.has("result"))
+      throw new IOException("Cannot find 'result' in json: " + json);
+    return jsonNode.get("result").asText();
 	}
 
 	private String without0x(String hex) {
