@@ -35,49 +35,36 @@ public class EthereumService {
 	private String contractAddress = "0xAF8ce136A244dB6f13a97e157AC39169F4E9E445";
 	private String jsonRpcUrl = "http://54.194.239.231:8545";
 
-	private Function approveFunction = Function.fromSignature("approveAccount", "address", "bool");
+	private Function approveAccountFunction = Function.fromSignature("approveAccount", "address");
+  private Function appointAccountApproverFunction = Function.fromSignature("appointAccountApprover", "address");
 
 	public void activateEthereumAccount(String accountAddress) throws IOException {
 		accountAddress = with0x(accountAddress);
-
 		ECKey approver = getAccountApproverKey();
-
-		long transactionCount = getTransactionCount(hex(approver.getAddress()));
-		byte[] nonce = ByteUtil.longToBytesNoLeadZeroes(transactionCount);
-
-		byte[] gasPrice = ByteUtil.longToBytesNoLeadZeroes(30000000000L);
-		byte[] gasLimit = ByteUtil.longToBytesNoLeadZeroes(200000);
-
-		byte[] toAddress = Hex.decode(without0x(contractAddress));
-		byte[] callData = approveFunction.encode(accountAddress, true);
-
-		Transaction transaction = new Transaction(nonce, gasPrice, gasLimit, toAddress, null, callData);
-		//noinspection ConstantConditions
-		transaction.sign(approver.getPrivKeyBytes());
-
-		String txHash = send(json("eth_sendRawTransaction", hex(transaction.getEncoded())));
+    String txHash = sendTransaction(approver, approveAccountFunction.encode(accountAddress));
 		log.info("Account " + accountAddress + " approved by " + hex(approver.getAddress()) + ". TxHash=" + txHash);
 	}
 
-	public void transferAccountApprovalRight(String newAddress) throws IOException {
+  public void transferAccountApprovalRight(String newAddress) throws IOException {
     newAddress = with0x(newAddress);
     ECKey approver = getAccountApproverKey();
+    String txHash = sendTransaction(approver, appointAccountApproverFunction.encode(newAddress));
+    log.info("Account approval right transferred to " + newAddress + ". You must change your account approver key file accordingly. TxHash=" + txHash);
+  }
 
-    long transactionCount = getTransactionCount(hex(approver.getAddress()));
+  private String sendTransaction(ECKey signer, byte[] callData) throws IOException {
+    long transactionCount = getTransactionCount(hex(signer.getAddress()));
     byte[] nonce = ByteUtil.longToBytesNoLeadZeroes(transactionCount);
 
     byte[] gasPrice = ByteUtil.longToBytesNoLeadZeroes(30000000000L);
     byte[] gasLimit = ByteUtil.longToBytesNoLeadZeroes(200000);
 
     byte[] toAddress = Hex.decode(without0x(contractAddress));
-    byte[] callData = Function.fromSignature("transferLawEnforcement", "address").encode(newAddress);
 
     Transaction transaction = new Transaction(nonce, gasPrice, gasLimit, toAddress, null, callData);
     //noinspection ConstantConditions
-    transaction.sign(approver.getPrivKeyBytes());
-
-    String txHash = send(json("eth_sendRawTransaction", hex(transaction.getEncoded())));
-    log.info("Account approval right transferred to " + newAddress + ". You must change your account approver key file accordingly. TxHash=" + txHash);
+    transaction.sign(signer.getPrivKeyBytes());
+    return send(json("eth_sendRawTransaction", hex(transaction.getEncoded())));
   }
 
 	private String hex(byte[] bytes) {
