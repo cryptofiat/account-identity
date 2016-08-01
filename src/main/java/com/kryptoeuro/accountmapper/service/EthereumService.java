@@ -37,36 +37,36 @@ public class EthereumService {
 	private String jsonRpcUrl = "http://54.194.239.231:8545"; // Parity node on AWS
 
 	private Function approveAccountFunction = Function.fromSignature("approveAccount", "address");
-  private Function appointAccountApproverFunction = Function.fromSignature("appointAccountApprover", "address");
+	private Function appointAccountApproverFunction = Function.fromSignature("appointAccountApprover", "address");
 
 	public void activateEthereumAccount(String accountAddress) throws IOException {
 		accountAddress = with0x(accountAddress);
 		ECKey approver = getAccountApproverKey();
-    String txHash = sendTransaction(approver, approveAccountFunction.encode(accountAddress));
+		String txHash = sendTransaction(approver, approveAccountFunction.encode(accountAddress));
 		log.info("Account " + accountAddress + " approved by " + hex(approver.getAddress()) + ". TxHash=" + txHash);
 	}
 
-  public void transferAccountApprovalRight(String newAddress) throws IOException {
-    newAddress = with0x(newAddress);
-    ECKey approver = getAccountApproverKey();
-    String txHash = sendTransaction(approver, appointAccountApproverFunction.encode(newAddress));
-    log.info("Account approval right transferred to " + newAddress + ". You must change your account approver key file accordingly. TxHash=" + txHash);
-  }
+	public void transferAccountApprovalRight(String newAddress) throws IOException {
+		newAddress = with0x(newAddress);
+		ECKey approver = getAccountApproverKey();
+		String txHash = sendTransaction(approver, appointAccountApproverFunction.encode(newAddress));
+		log.info("Account approval right transferred to " + newAddress + ". You must change your account approver key file accordingly. TxHash=" + txHash);
+	}
 
-  private String sendTransaction(ECKey signer, byte[] callData) throws IOException {
-    long transactionCount = getTransactionCount(hex(signer.getAddress()));
-    byte[] nonce = ByteUtil.longToBytesNoLeadZeroes(transactionCount);
+	private String sendTransaction(ECKey signer, byte[] callData) throws IOException {
+		long transactionCount = getTransactionCount(hex(signer.getAddress()));
+		byte[] nonce = ByteUtil.longToBytesNoLeadZeroes(transactionCount);
 
-    byte[] gasPrice = ByteUtil.longToBytesNoLeadZeroes(30000000000L);
-    byte[] gasLimit = ByteUtil.longToBytesNoLeadZeroes(200000);
+		byte[] gasPrice = ByteUtil.longToBytesNoLeadZeroes(30000000000L);
+		byte[] gasLimit = ByteUtil.longToBytesNoLeadZeroes(200000);
 
-    byte[] toAddress = Hex.decode(without0x(contractAddress));
+		byte[] toAddress = Hex.decode(without0x(contractAddress));
 
-    Transaction transaction = new Transaction(nonce, gasPrice, gasLimit, toAddress, null, callData);
-    //noinspection ConstantConditions
-    transaction.sign(signer.getPrivKeyBytes());
-    return send(json("eth_sendRawTransaction", hex(transaction.getEncoded())));
-  }
+		Transaction transaction = new Transaction(nonce, gasPrice, gasLimit, toAddress, null, callData);
+		//noinspection ConstantConditions
+		transaction.sign(signer.getPrivKeyBytes());
+		return send(json("eth_sendRawTransaction", hex(transaction.getEncoded())));
+	}
 
 	private String hex(byte[] bytes) {
 		return with0x(Hex.toHexString(bytes));
@@ -112,11 +112,11 @@ public class EthereumService {
 		JsonNode jsonNode = new ObjectMapper().readTree(json);
 		if (!jsonNode.get("jsonrpc").asText().equals("2.0"))
 			throw new IOException("Unknown json response: " + json);
-    if (jsonNode.has("error"))
-      throw new IOException(jsonNode.get("error").get("message").asText());
-    if (!jsonNode.has("result"))
-      throw new IOException("Cannot find 'result' in json: " + json);
-    return jsonNode.get("result").asText();
+		if (jsonNode.has("error"))
+			throw new IOException(jsonNode.get("error").get("message").asText());
+		if (!jsonNode.has("result"))
+			throw new IOException("Cannot find 'result' in json: " + json);
+		return jsonNode.get("result").asText();
 	}
 
 	private String without0x(String hex) {
