@@ -42,6 +42,9 @@ dependencies {
 	compile "org.hibernate:hibernate-java8:5.1.0.Final"
 	compile "mysql:mysql-connector-java:5.1.30"
 	testCompile('org.springframework.boot:spring-boot-starter-test')
+
+	compile("io.springfox:springfox-swagger2:2.0.2")
+	compile("io.springfox:springfox-swagger-ui:2.0.2")
 }
 
 
