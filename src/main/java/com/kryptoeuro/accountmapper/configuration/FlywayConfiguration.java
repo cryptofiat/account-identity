@@ -38,19 +38,9 @@ public class FlywayConfiguration {
 
 		flyway.setLocations(migrationLocations);    //Where do I look for migrations
 
-		if (shouldClean()) {
-			flyway.clean();
-		}
-
 		flyway.repair(); //If migration failed cleanup and retry
 		flyway.migrate(); //Apply migrations
 		return flyway;
-	}
-
-	private boolean shouldClean() {
-		return Arrays.stream(environment.getActiveProfiles())
-				.filter(x -> PROFILES_WITH_NO_FLYWAY_CLEAN.contains(x))
-				.count() == 0;
 	}
 }
 
