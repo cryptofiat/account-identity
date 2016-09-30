@@ -35,7 +35,7 @@ public class EthereumService {
 	//Todo configure in yml
 //	private String contractAddress = "0xAF8ce136A244dB6f13a97e157AC39169F4E9E445"; // contract 0.31
 	private String contractAddress = "0x2FdAB8f12fA9Ad9Ad91fc55d52569AFc98Be9831"; // contract 0.41
-	private String jsonRpcUrl = "http://54.194.239.231:8545"; // Parity node on AWS
+	private String jsonRpcUrl = "http://http://eth.euro2.ee:8080"; // Parity node on AWS
 
 	private Function approveAccountFunction = Function.fromSignature("approveAccount", "address");
 	private Function appointAccountApproverFunction = Function.fromSignature("appointAccountApprover", "address");

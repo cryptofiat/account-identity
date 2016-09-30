@@ -36,7 +36,7 @@ public class AccountMapperController {
 	@Autowired
 	AccountManagementService accountManagementService;
 
-	private static boolean accountActivationEnabled = false;
+	private static boolean accountActivationEnabled = true;
 
 	//Initial HttpSession approach did not work with marat's app. Will keep in memory here for now
 	private static Map<String, PendingMobileIdAuthorisation> pendingAuthorisations = new HashMap<String, PendingMobileIdAuthorisation>();

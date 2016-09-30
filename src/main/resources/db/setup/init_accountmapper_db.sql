@@ -1,4 +1,4 @@
- CREATE SCHEMA `account_identity` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE SCHEMA `account_identity` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- Might fail if flyway user has already been created for that node
 CREATE USER 'flyway'@'localhost' IDENTIFIED BY 'q1w2e3r4';
