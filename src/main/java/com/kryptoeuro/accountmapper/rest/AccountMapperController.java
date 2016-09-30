@@ -35,6 +35,8 @@ public class AccountMapperController {
 	@Autowired
 	AccountManagementService accountManagementService;
 
+	private static boolean accountActivationEnabled = false;
+
 	@RequestMapping(value = "/", produces = "text/plain")
 	public String index() {
 		return "OK";
@@ -84,7 +86,11 @@ public class AccountMapperController {
 		try {
 			accountManagementService.storeNewAccount(accountAddress, mobileIDSession.personalCode);
 			pendingMobileIdAuthorisation.mobileIdSession = null;
-			ethereumService.activateEthereumAccount(accountAddress);
+
+			if (accountActivationEnabled) {
+				ethereumService.activateEthereumAccount(accountAddress);
+			}
+
 			pendingMobileIdAuthorisation.address = null;
 		} catch (Exception e) {
 			return new ResponseEntity<PollResponse>(new PollResponse(PollResponseStatus.LOGIN_FAILURE), HttpStatus.OK);
