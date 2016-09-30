@@ -39,6 +39,9 @@ dependencies {
 	compile('org.apache.httpcomponents:httpclient')
 	compile 'org.projectlombok:lombok:1.16.6'
 	testCompile('org.springframework.boot:spring-boot-starter-test')
+
+	compile("io.springfox:springfox-swagger2:2.0.2")
+	compile("io.springfox:springfox-swagger-ui:2.0.2")
 }
 
 
