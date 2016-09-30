@@ -46,4 +46,8 @@ public class AccountManagementService {
 	public List<EthereumAccount> getAccountsByAccountAddress(String accountAddress) {
 		return ethereumAccountRepository.findByAddress(accountAddress);
 	}
+
+	public List<EthereumAccount> getAllAccounts() {
+		return ethereumAccountRepository.findAll();
+	}
 }

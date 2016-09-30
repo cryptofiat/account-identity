@@ -95,8 +95,11 @@ public class AccountMapperController {
 		return new ResponseEntity<PollResponse>(new PollResponse(PollResponseStatus.LOGIN_SUCCESS), HttpStatus.OK);
 	}
 
-	@RequestMapping(method = GET, value = "/account/list" )
-	public List<EthereumAccount> listAccounts(@RequestParam(name = "ownerId") String ownerId) {
-		return accountManagementService.getAccountsByOwnerId(ownerId);
+	@RequestMapping(method = GET, value = "/accounts")
+	public List<EthereumAccount> listAccounts(@RequestParam(name = "ownerId", required = false) String ownerId) {
+		if (ownerId != null) {
+			accountManagementService.getAccountsByOwnerId(ownerId);
+		}
+		return accountManagementService.getAllAccounts();
 	}
 }
