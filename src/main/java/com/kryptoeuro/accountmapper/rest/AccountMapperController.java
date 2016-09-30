@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @RestController
@@ -36,11 +37,6 @@ public class AccountMapperController {
 	AccountManagementService accountManagementService;
 
 	private static boolean accountActivationEnabled = false;
-
-	@RequestMapping(value = "/", produces = "text/plain")
-	public String index() {
-		return "OK";
-	}
 
 	//Initial HttpSession approach did not work with marat's app. Will keep in memory here for now
 	private static Map<String, PendingMobileIdAuthorisation> pendingAuthorisations = new HashMap<String, PendingMobileIdAuthorisation>();
@@ -99,7 +95,7 @@ public class AccountMapperController {
 		return new ResponseEntity<PollResponse>(new PollResponse(PollResponseStatus.LOGIN_SUCCESS), HttpStatus.OK);
 	}
 
-	@RequestMapping(value = "/account/list")
+	@RequestMapping(method = GET, value = "/account/list" )
 	public List<EthereumAccount> listAccounts(@RequestParam(name = "ownerId") String ownerId) {
 		return accountManagementService.getAccountsByOwnerId(ownerId);
 	}
