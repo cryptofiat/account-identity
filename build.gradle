@@ -37,7 +37,10 @@ dependencies {
 		exclude group: "org.slf4j", module: "slf4j-log4j12"
 	}
 	compile('org.apache.httpcomponents:httpclient')
-	compile 'org.projectlombok:lombok:1.16.6'
+	compile('org.projectlombok:lombok:1.16.6')
+	compile('org.flywaydb:flyway-core:4.0.1')
+	compile "org.hibernate:hibernate-java8:5.1.0.Final"
+	compile "mysql:mysql-connector-java:5.1.30"
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 }
 
