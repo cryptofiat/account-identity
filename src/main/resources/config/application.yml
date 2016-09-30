@@ -1,3 +1,23 @@
 spring:
   datasource:
-    url: jdbc:h2:./d1
+    url: jdbc:mysql://localhost:3306/account_identity?characterEncoding=UTF-8&useLegacyDatetimeCode=false&serverTimezone=UTC
+    username: acc-id-service
+    password: q1w2e3r4
+    initialize: true
+    driver-class-name: com.mysql.jdbc.Driver
+    continue-on-error: false
+    test-on-borrow: true
+    validation-query: SELECT 1
+
+flyway:
+  user: flyway
+  password: q1w2e3r4
+  datasource:
+    url: ${spring.datasource.url}
+    username: ${flyway.user}
+    password: ${flyway.password}
+    driver-class-name: ${spring.datasource.driver-class-name}
+    initialize: false
+    continue-on-error: false
+    test-on-borrow: true
+    validation-query: SELECT 1
