@@ -50,4 +50,8 @@ public class AccountManagementService {
 	public List<EthereumAccount> getAllAccounts() {
 		return ethereumAccountRepository.findAll();
 	}
+
+	public void removeAccountById(Long id) {
+		ethereumAccountRepository.delete(id);
+	}
 }

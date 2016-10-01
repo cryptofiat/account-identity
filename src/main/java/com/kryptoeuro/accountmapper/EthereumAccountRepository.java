@@ -9,6 +9,7 @@ public interface EthereumAccountRepository extends CrudRepository<EthereumAccoun
 
     List<EthereumAccount> findByOwnerId(String ownerId);
     List<EthereumAccount> findByAddress(String accountAddress);
-
     List<EthereumAccount> findAll();
+
+    void delete(Long id);
 }

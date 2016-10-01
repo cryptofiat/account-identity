@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
@@ -100,6 +101,12 @@ public class AccountMapperController {
 		if (ownerId != null) {
 			accountManagementService.getAccountsByOwnerId(ownerId);
 		}
+		return accountManagementService.getAllAccounts();
+	}
+
+	@RequestMapping(method = DELETE, value = "/accounts")
+	public List<EthereumAccount> removeAccount(@RequestParam(name = "mappingId", required = true) Long mappingId) {
+		accountManagementService.removeAccountById(mappingId);
 		return accountManagementService.getAllAccounts();
 	}
 }
