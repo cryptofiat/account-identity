@@ -12,6 +12,8 @@ import com.kryptoeuro.accountmapper.service.EthereumService;
 import com.kryptoeuro.accountmapper.service.MobileIdAuthService;
 import com.kryptoeuro.accountmapper.state.AuthenticationStatus;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -30,6 +32,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 @RestController
 @RequestMapping("/v1")
 @CrossOrigin(origins = "*")
+@Slf4j
 public class AccountMapperController {
 	@Autowired
 	MobileIdAuthService mobileIdAuthService;
@@ -93,6 +96,7 @@ public class AccountMapperController {
 
 			pendingMobileIdAuthorisation.address = null;
 		} catch (Exception e) {
+            log.error("Login failure", e);
 			return new ResponseEntity<PollResponse>(new PollResponse(AuthenticationStatus.LOGIN_FAILURE), HttpStatus.OK);
 		}
 
