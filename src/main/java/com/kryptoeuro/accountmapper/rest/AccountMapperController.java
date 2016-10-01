@@ -11,6 +11,7 @@ import com.kryptoeuro.accountmapper.service.AccountManagementService;
 import com.kryptoeuro.accountmapper.service.EthereumService;
 import com.kryptoeuro.accountmapper.service.MobileIdAuthService;
 import com.kryptoeuro.accountmapper.state.PollResponseStatus;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -42,9 +43,10 @@ public class AccountMapperController {
 	//Initial HttpSession approach did not work with marat's app. Will keep in memory here for now
 	private static Map<String, PendingMobileIdAuthorisation> pendingAuthorisations = new HashMap<String, PendingMobileIdAuthorisation>();
 
+	@ApiOperation(value = "Initiate mobile-id authorisation")
 	@RequestMapping(
 			method = POST,
-			value = "/authenticate",
+			value = "/authorisations",
 			consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<AuthenticateResponse> authenticate(@Valid @RequestBody AuthenticateCommand authenticateCommand) {
 		// start mobile id auth
@@ -56,9 +58,10 @@ public class AccountMapperController {
 		return new ResponseEntity<AuthenticateResponse>(authenticateResponse, HttpStatus.OK);
 	}
 
+	@ApiOperation(value = "[Polling endpoint] Validate authorisation, store new account-identity mapping and activate ethereum account")
 	@RequestMapping(
 			method = POST,
-			value = "/poll",
+			value = "/accounts",
 			consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<PollResponse> poll(@Valid @RequestBody PollCommand pollCommand) {
 		PendingMobileIdAuthorisation pendingMobileIdAuthorisation = pendingAuthorisations.get(pollCommand.getAuthIdentifier());
