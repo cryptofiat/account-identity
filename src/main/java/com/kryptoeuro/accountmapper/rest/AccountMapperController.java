@@ -5,6 +5,7 @@ import com.kryptoeuro.accountmapper.command.AuthenticateCommand;
 import com.kryptoeuro.accountmapper.command.PollCommand;
 import com.kryptoeuro.accountmapper.domain.EthereumAccount;
 import com.kryptoeuro.accountmapper.domain.PendingMobileIdAuthorisation;
+import com.kryptoeuro.accountmapper.response.AccountsResponse;
 import com.kryptoeuro.accountmapper.response.AuthenticateResponse;
 import com.kryptoeuro.accountmapper.response.PollResponse;
 import com.kryptoeuro.accountmapper.service.AccountManagementService;
@@ -20,12 +21,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
+import static org.springframework.web.bind.annotation.RequestMethod.*;
 
 @RestController
 @RequestMapping("/v1")
@@ -103,17 +101,17 @@ public class AccountMapperController {
 
 	@ApiOperation(value = "View existing accounts")
 	@RequestMapping(method = GET, value = "/accounts")
-	public List<EthereumAccount> listAccounts(@RequestParam(name = "ownerId", required = false) String ownerId) {
+	public ResponseEntity<AccountsResponse> listAccounts(@RequestParam(name = "ownerId", required = false) String ownerId) {
 		if (ownerId != null) {
-			accountManagementService.getAccountsByOwnerId(ownerId);
+			return new ResponseEntity<AccountsResponse>(AccountsResponse.fromEthereumAccounts(accountManagementService.getAccountsByOwnerId(ownerId)), HttpStatus.OK);
 		}
-		return accountManagementService.getAllAccounts();
+		return new ResponseEntity<AccountsResponse>(AccountsResponse.fromEthereumAccounts(accountManagementService.getAllAccounts()), HttpStatus.OK);
 	}
 
 	@ApiOperation(value = "Remove account identity mapping")
 	@RequestMapping(method = DELETE, value = "/accounts")
-	public List<EthereumAccount> removeAccount(@RequestParam(name = "mappingId", required = true) Long mappingId) {
+	public ResponseEntity<AccountsResponse> removeAccount(@RequestParam(name = "mappingId", required = true) Long mappingId) {
 		accountManagementService.removeAccountById(mappingId);
-		return accountManagementService.getAllAccounts();
+		return new ResponseEntity<AccountsResponse>(AccountsResponse.fromEthereumAccounts(accountManagementService.getAllAccounts()), HttpStatus.OK);
 	}
 }
