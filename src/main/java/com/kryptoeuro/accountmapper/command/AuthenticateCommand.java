@@ -10,6 +10,5 @@ import javax.validation.constraints.NotNull;
 public class AuthenticateCommand {
 	@NotNull
 	String accountAddress;
-	@NotNull
 	String phoneNumber;
 }

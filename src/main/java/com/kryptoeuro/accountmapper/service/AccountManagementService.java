@@ -2,6 +2,7 @@ package com.kryptoeuro.accountmapper.service;
 
 
 import com.kryptoeuro.accountmapper.EthereumAccountRepository;
+import com.kryptoeuro.accountmapper.domain.AuthorisationType;
 import com.kryptoeuro.accountmapper.domain.EthereumAccount;
 import com.kryptoeuro.accountmapper.error.CannotStoreAccountException;
 import lombok.extern.slf4j.Slf4j;
@@ -19,10 +20,15 @@ public class AccountManagementService {
 	@Autowired
 	EthereumAccountRepository ethereumAccountRepository;
 
-	public EthereumAccount storeNewAccount(String address, String ownerId) {
+	public EthereumAccount storeNewAccount(String address, String ownerId, AuthorisationType authorisationType) {
 		try {
 			validateAccountStoring(address, ownerId);
-			EthereumAccount account = EthereumAccount.builder().ownerId(ownerId).address(address).activated(false).build();
+			EthereumAccount account = EthereumAccount.builder()
+					.ownerId(ownerId)
+					.address(address)
+					.activated(false)
+					.authorisationType(authorisationType)
+					.build();
 			ethereumAccountRepository.save(account);
 			return account;
 		} catch (CannotStoreAccountException e) {
