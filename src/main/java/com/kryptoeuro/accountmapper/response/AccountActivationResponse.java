@@ -5,11 +5,11 @@ import com.kryptoeuro.accountmapper.state.AuthenticationStatus;
 import lombok.Data;
 
 @Data
-public class PollResponse {
+public class AccountActivationResponse {
 	String authenticationStatus;
 	String authorisationType;
 
-	public PollResponse(AuthenticationStatus status, AuthorisationType type) {
+	public AccountActivationResponse(AuthenticationStatus status, AuthorisationType type) {
 		this.authenticationStatus = status.name();
 		this.authorisationType = type.name();
 	}

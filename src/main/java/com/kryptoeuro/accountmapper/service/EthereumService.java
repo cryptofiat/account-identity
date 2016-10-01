@@ -85,7 +85,7 @@ public class EthereumService {
 		}
 	}
 
-	private String getParityAuthCredentials() throws IOException {
+	public String getParityAuthCredentials() throws IOException {
 		File file = new File(System.getProperty("user.home"), ".ParityNodeAuthCreds");
 		try {
 			return toString(new FileInputStream(file));
