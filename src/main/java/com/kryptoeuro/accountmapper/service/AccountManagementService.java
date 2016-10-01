@@ -19,11 +19,12 @@ public class AccountManagementService {
 	@Autowired
 	EthereumAccountRepository ethereumAccountRepository;
 
-	public void storeNewAccount(String address, String ownerId) throws CannotStoreAccountException {
+	public EthereumAccount storeNewAccount(String address, String ownerId) {
 		try {
 			validateAccountStoring(address, ownerId);
-			EthereumAccount account = new EthereumAccount(ownerId, address);
+			EthereumAccount account = EthereumAccount.builder().ownerId(ownerId).address(address).activated(false).build();
 			ethereumAccountRepository.save(account);
+			return account;
 		} catch (CannotStoreAccountException e) {
 			throw e;
 		} catch (Exception e) {
@@ -31,7 +32,16 @@ public class AccountManagementService {
 		}
 	}
 
-	private void validateAccountStoring(String address, String ownerId) throws CannotStoreAccountException {
+	public void activateAccount(EthereumAccount account) {
+		try {
+			account.setActivated(true);
+			ethereumAccountRepository.save(account);
+		} catch (Exception e) {
+			throw new CannotStoreAccountException("Crashed while activating new account", e.getCause());
+		}
+	}
+
+	private void validateAccountStoring(String address, String ownerId) {
 		if (address == null) throw new CannotStoreAccountException("Address undefined");
 		if (ownerId == null) throw new CannotStoreAccountException("OwnerId undefined");
 		//better be solved by domain object uniqueness constraint

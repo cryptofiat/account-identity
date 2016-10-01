@@ -82,9 +82,9 @@ public class AccountMapperController {
 		if (!isAuthenticated) {
 			return new ResponseEntity<PollResponse>(new PollResponse(AuthenticationStatus.LOGIN_PENDING), HttpStatus.OK);
 		}
-
+		EthereumAccount newAccount;
 		try {
-			accountManagementService.storeNewAccount(accountAddress, mobileIDSession.personalCode);
+			newAccount = accountManagementService.storeNewAccount(accountAddress, mobileIDSession.personalCode);
 			pendingMobileIdAuthorisation.mobileIdSession = null;
 
 			if (accountActivationEnabled) {
@@ -95,6 +95,8 @@ public class AccountMapperController {
 		} catch (Exception e) {
 			return new ResponseEntity<PollResponse>(new PollResponse(AuthenticationStatus.LOGIN_FAILURE), HttpStatus.OK);
 		}
+
+		accountManagementService.activateAccount(newAccount);
 
 		return new ResponseEntity<PollResponse>(new PollResponse(AuthenticationStatus.LOGIN_SUCCESS), HttpStatus.OK);
 	}
