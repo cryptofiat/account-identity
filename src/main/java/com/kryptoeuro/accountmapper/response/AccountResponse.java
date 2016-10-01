@@ -10,4 +10,5 @@ class Account {
 	private String ownerId;
 	private String address;
 	private boolean activated;
+	private String authorisationType;
 }

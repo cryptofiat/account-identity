@@ -23,6 +23,7 @@ public class AccountsResponse {
 							.address(accountDomain.getAddress())
 							.ownerId(replaceLastFour(accountDomain.getOwnerId()))
 							.activated(accountDomain.isActivated())
+							.authorisationType(accountDomain.getAuthorisationType().name())
 							.build()
 			);
 		}
