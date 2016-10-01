@@ -42,7 +42,7 @@ public class AccountMapperController {
 	@Autowired
 	PendingAuthorisationService pendingAuthorisationService;
 
-	private static boolean accountActivationEnabled = false;
+	private static boolean accountActivationEnabled = true;
 
 	@ApiOperation(value = "Initiate mobile-id authorisation")
 	@RequestMapping(
