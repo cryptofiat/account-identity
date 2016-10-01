@@ -21,6 +21,19 @@ public class PendingAuthorisationService {
 	@Autowired
 	PendingAuthorisationRepository pendingAuthorisationRepository;
 
+	public PendingAuthorisation store(String accountAddress) {
+		try {
+			PendingAuthorisation newPendingAuthorisation = PendingAuthorisation.builder()
+					.type(AuthorisationType.BANK_TRANSFER)
+					.address(accountAddress)
+					.authIdentifier(UUID.randomUUID())
+					.build();
+			return pendingAuthorisationRepository.save(newPendingAuthorisation);
+		} catch (Exception e) {
+			throw new CannotStorePendingAuthorisationException("Crashed while storing pending authorisation", e.getCause());
+		}
+	}
+
 	public PendingAuthorisation store(String accountAddress, MobileIDSession mobileIDSession) {
 		try {
 			PendingAuthorisation newPendingAuthorisation = PendingAuthorisation.builder()
