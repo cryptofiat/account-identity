@@ -4,17 +4,17 @@ import com.codeborne.security.mobileid.MobileIDSession;
 import com.kryptoeuro.accountmapper.command.AuthenticateCommand;
 import com.kryptoeuro.accountmapper.command.PollCommand;
 import com.kryptoeuro.accountmapper.domain.EthereumAccount;
-import com.kryptoeuro.accountmapper.domain.PendingMobileIdAuthorisation;
+import com.kryptoeuro.accountmapper.domain.PendingAuthorisation;
 import com.kryptoeuro.accountmapper.response.AccountsResponse;
 import com.kryptoeuro.accountmapper.response.AuthenticateResponse;
 import com.kryptoeuro.accountmapper.response.PollResponse;
 import com.kryptoeuro.accountmapper.service.AccountManagementService;
 import com.kryptoeuro.accountmapper.service.EthereumService;
 import com.kryptoeuro.accountmapper.service.MobileIdAuthService;
+import com.kryptoeuro.accountmapper.service.PendingAuthorisationService;
 import com.kryptoeuro.accountmapper.state.AuthenticationStatus;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -22,9 +22,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 
 import static org.springframework.web.bind.annotation.RequestMethod.*;
 
@@ -39,11 +36,10 @@ public class AccountMapperController {
 	EthereumService ethereumService;
 	@Autowired
 	AccountManagementService accountManagementService;
+	@Autowired
+	PendingAuthorisationService pendingAuthorisationService;
 
 	private static boolean accountActivationEnabled = true;
-
-	//Initial HttpSession approach did not work with marat's app. Will keep in memory here for now
-	private static Map<UUID, PendingMobileIdAuthorisation> pendingAuthorisations = new HashMap<UUID, PendingMobileIdAuthorisation>();
 
 	@ApiOperation(value = "Initiate mobile-id authorisation")
 	@RequestMapping(
@@ -54,10 +50,9 @@ public class AccountMapperController {
 		// start mobile id auth
 		MobileIDSession mobileIDSession = mobileIdAuthService.startLogin(authenticateCommand.getPhoneNumber());
 
-		UUID authIdentifier = UUID.randomUUID();
-		pendingAuthorisations.put(authIdentifier, new PendingMobileIdAuthorisation(mobileIDSession, authenticateCommand.getAccountAddress()));
+		PendingAuthorisation pendingAuthorisation = pendingAuthorisationService.store(authenticateCommand.getAccountAddress(), mobileIDSession);
 
-		AuthenticateResponse authenticateResponse = new AuthenticateResponse(mobileIDSession.challenge, authIdentifier);
+		AuthenticateResponse authenticateResponse = new AuthenticateResponse(mobileIDSession.challenge, pendingAuthorisation.getAuthIdentifier());
 		return new ResponseEntity<AuthenticateResponse>(authenticateResponse, HttpStatus.OK);
 	}
 
@@ -67,40 +62,39 @@ public class AccountMapperController {
 			value = "/accounts",
 			consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<PollResponse> authorizeAndCreateAccountIdentityMapping(@Valid @RequestBody PollCommand pollCommand) {
-		PendingMobileIdAuthorisation pendingMobileIdAuthorisation = pendingAuthorisations.get(pollCommand.getAuthIdentifier());
+		PendingAuthorisation pendingAuthorisation = pendingAuthorisationService.findByAuthIdentifier(pollCommand.getAuthIdentifier());
 
-		if (pendingMobileIdAuthorisation == null) {
+		if (pendingAuthorisation == null) {
 			return new ResponseEntity<PollResponse>(new PollResponse(AuthenticationStatus.LOGIN_EXPIRED), HttpStatus.OK);
 		}
 
-		MobileIDSession mobileIDSession = pendingMobileIdAuthorisation.mobileIdSession;
-		String accountAddress = pendingMobileIdAuthorisation.address;
+		MobileIDSession mobileIDSession = MobileIDSession.fromString(pendingAuthorisation.getSerialisedMobileIdSession());
+		String accountAddress = pendingAuthorisation.getAddress();
 
 		if (mobileIDSession == null || accountAddress == null) {
 			return new ResponseEntity<PollResponse>(new PollResponse(AuthenticationStatus.LOGIN_EXPIRED), HttpStatus.OK);
 		}
 
 		// Check if authenticated
-		boolean isAuthenticated = mobileIdAuthService.isLoginComplete(mobileIDSession);
-		if (!isAuthenticated) {
+		if (mobileIdAuthService.isLoginComplete(mobileIDSession)) {
+			pendingAuthorisationService.expire(pendingAuthorisation);
+		} else {
 			return new ResponseEntity<PollResponse>(new PollResponse(AuthenticationStatus.LOGIN_PENDING), HttpStatus.OK);
 		}
+
 		EthereumAccount newAccount;
 		try {
 			newAccount = accountManagementService.storeNewAccount(accountAddress, mobileIDSession.personalCode);
-			pendingMobileIdAuthorisation.mobileIdSession = null;
 
 			if (accountActivationEnabled) {
 				ethereumService.activateEthereumAccount(accountAddress);
 			}
-
-			pendingMobileIdAuthorisation.address = null;
 		} catch (Exception e) {
             log.error("Login failure", e);
 			return new ResponseEntity<PollResponse>(new PollResponse(AuthenticationStatus.LOGIN_FAILURE), HttpStatus.OK);
 		}
 
-		accountManagementService.activateAccount(newAccount);
+		accountManagementService.markActivated(newAccount);
 
 		return new ResponseEntity<PollResponse>(new PollResponse(AuthenticationStatus.LOGIN_SUCCESS), HttpStatus.OK);
 	}

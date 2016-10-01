@@ -32,7 +32,7 @@ public class AccountManagementService {
 		}
 	}
 
-	public void activateAccount(EthereumAccount account) {
+	public void markActivated(EthereumAccount account) {
 		try {
 			account.setActivated(true);
 			ethereumAccountRepository.save(account);
