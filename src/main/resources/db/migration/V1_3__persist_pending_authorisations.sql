@@ -4,7 +4,7 @@ CREATE TABLE pending_authorisation (
 	address VARCHAR(50),
 	serialised_mobile_id_session VARCHAR(100),
   creation_time TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-  modification_time TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  modification_time TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP,
 
   PRIMARY KEY (auth_identifier)
 );
