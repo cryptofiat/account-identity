@@ -1,0 +1,13 @@
+package com.kryptoeuro.accountmapper.response;
+
+import lombok.Builder;
+import lombok.Data;
+
+@Data
+@Builder
+class Account {
+	private Long id;
+	private String ownerId;
+	private String address;
+	private boolean activated;
+}
