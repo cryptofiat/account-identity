@@ -45,7 +45,8 @@ public class AccountManagementService {
 		if (address == null) throw new CannotStoreAccountException("Address undefined");
 		if (ownerId == null) throw new CannotStoreAccountException("OwnerId undefined");
 		//better be solved by domain object uniqueness constraint
-		if (getAccountsByAccountAddress(address).size() > 0) throw new CannotStoreAccountException("Account already in system");
+		if (getAccountsByAccountAddress(address, true).size() > 0)
+			throw new CannotStoreAccountException("Account already in system");
 
 	}
 
@@ -55,6 +56,10 @@ public class AccountManagementService {
 
 	public List<EthereumAccount> getAccountsByAccountAddress(String accountAddress) {
 		return ethereumAccountRepository.findByAddress(accountAddress);
+	}
+
+	public List<EthereumAccount> getAccountsByAccountAddress(String accountAddress, boolean activated) {
+		return ethereumAccountRepository.findByAddressAndActivated(accountAddress, activated);
 	}
 
 	public List<EthereumAccount> getAllAccounts() {
