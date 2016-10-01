@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.springframework.web.bind.annotation.RequestMethod.*;
 
@@ -42,7 +43,7 @@ public class AccountMapperController {
 	private static boolean accountActivationEnabled = true;
 
 	//Initial HttpSession approach did not work with marat's app. Will keep in memory here for now
-	private static Map<String, PendingMobileIdAuthorisation> pendingAuthorisations = new HashMap<String, PendingMobileIdAuthorisation>();
+	private static Map<UUID, PendingMobileIdAuthorisation> pendingAuthorisations = new HashMap<UUID, PendingMobileIdAuthorisation>();
 
 	@ApiOperation(value = "Initiate mobile-id authorisation")
 	@RequestMapping(
@@ -53,9 +54,10 @@ public class AccountMapperController {
 		// start mobile id auth
 		MobileIDSession mobileIDSession = mobileIdAuthService.startLogin(authenticateCommand.getPhoneNumber());
 
-		pendingAuthorisations.put(mobileIDSession.challenge, new PendingMobileIdAuthorisation(mobileIDSession, authenticateCommand.getAccountAddress()));
+		UUID authIdentifier = UUID.randomUUID();
+		pendingAuthorisations.put(authIdentifier, new PendingMobileIdAuthorisation(mobileIDSession, authenticateCommand.getAccountAddress()));
 
-		AuthenticateResponse authenticateResponse = new AuthenticateResponse(mobileIDSession.challenge, mobileIDSession.challenge); //todo change second parameter to unique identifier
+		AuthenticateResponse authenticateResponse = new AuthenticateResponse(mobileIDSession.challenge, authIdentifier);
 		return new ResponseEntity<AuthenticateResponse>(authenticateResponse, HttpStatus.OK);
 	}
 
