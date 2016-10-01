@@ -99,6 +99,7 @@ public class AccountMapperController {
 		return new ResponseEntity<PollResponse>(new PollResponse(AuthenticationStatus.LOGIN_SUCCESS), HttpStatus.OK);
 	}
 
+	@ApiOperation(value = "View existing accounts")
 	@RequestMapping(method = GET, value = "/accounts")
 	public List<EthereumAccount> listAccounts(@RequestParam(name = "ownerId", required = false) String ownerId) {
 		if (ownerId != null) {
@@ -107,6 +108,7 @@ public class AccountMapperController {
 		return accountManagementService.getAllAccounts();
 	}
 
+	@ApiOperation(value = "Remove account identity mapping")
 	@RequestMapping(method = DELETE, value = "/accounts")
 	public List<EthereumAccount> removeAccount(@RequestParam(name = "mappingId", required = true) Long mappingId) {
 		accountManagementService.removeAccountById(mappingId);
