@@ -1,6 +1,6 @@
 package com.kryptoeuro.accountmapper.error;
 
-public class CannotStoreAccountException extends Exception {
+public class CannotStoreAccountException extends RuntimeException {
 
 	public CannotStoreAccountException(String message, Throwable cause) {
 		super(message, cause);

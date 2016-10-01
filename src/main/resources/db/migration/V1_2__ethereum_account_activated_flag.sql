@@ -1,0 +1,1 @@
+ALTER TABLE ethereum_account ADD activated TINYINT(1) DEFAULT 0 NOT NULL;
