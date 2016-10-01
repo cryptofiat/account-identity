@@ -1,15 +1,15 @@
 package com.kryptoeuro.accountmapper.response;
 
-import com.kryptoeuro.accountmapper.state.PollResponseStatus;
+import com.kryptoeuro.accountmapper.state.AuthenticationStatus;
 import lombok.Builder;
 import lombok.Data;
 
 @Data
 public class PollResponse {
-	String status;
+	String authenticationStatus;
 
 	@Builder
-	public PollResponse(PollResponseStatus status) {
-		this.status = status.name();
+	public PollResponse(AuthenticationStatus authenticationStatus) {
+		this.authenticationStatus = authenticationStatus.name();
 	}
 }

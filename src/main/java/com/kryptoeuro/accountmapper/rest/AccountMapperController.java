@@ -10,7 +10,7 @@ import com.kryptoeuro.accountmapper.response.PollResponse;
 import com.kryptoeuro.accountmapper.service.AccountManagementService;
 import com.kryptoeuro.accountmapper.service.EthereumService;
 import com.kryptoeuro.accountmapper.service.MobileIdAuthService;
-import com.kryptoeuro.accountmapper.state.PollResponseStatus;
+import com.kryptoeuro.accountmapper.state.AuthenticationStatus;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -63,24 +63,24 @@ public class AccountMapperController {
 			method = POST,
 			value = "/accounts",
 			consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public ResponseEntity<PollResponse> poll(@Valid @RequestBody PollCommand pollCommand) {
+	public ResponseEntity<PollResponse> authorizeAndCreateAccountIdentityMapping(@Valid @RequestBody PollCommand pollCommand) {
 		PendingMobileIdAuthorisation pendingMobileIdAuthorisation = pendingAuthorisations.get(pollCommand.getAuthIdentifier());
 
 		if (pendingMobileIdAuthorisation == null) {
-			return new ResponseEntity<PollResponse>(new PollResponse(PollResponseStatus.LOGIN_EXPIRED), HttpStatus.OK);
+			return new ResponseEntity<PollResponse>(new PollResponse(AuthenticationStatus.LOGIN_EXPIRED), HttpStatus.OK);
 		}
 
 		MobileIDSession mobileIDSession = pendingMobileIdAuthorisation.mobileIdSession;
 		String accountAddress = pendingMobileIdAuthorisation.address;
 
 		if (mobileIDSession == null || accountAddress == null) {
-			return new ResponseEntity<PollResponse>(new PollResponse(PollResponseStatus.LOGIN_EXPIRED), HttpStatus.OK);
+			return new ResponseEntity<PollResponse>(new PollResponse(AuthenticationStatus.LOGIN_EXPIRED), HttpStatus.OK);
 		}
 
 		// Check if authenticated
 		boolean isAuthenticated = mobileIdAuthService.isLoginComplete(mobileIDSession);
 		if (!isAuthenticated) {
-			return new ResponseEntity<PollResponse>(new PollResponse(PollResponseStatus.LOGIN_PENDING), HttpStatus.OK);
+			return new ResponseEntity<PollResponse>(new PollResponse(AuthenticationStatus.LOGIN_PENDING), HttpStatus.OK);
 		}
 
 		try {
@@ -93,10 +93,10 @@ public class AccountMapperController {
 
 			pendingMobileIdAuthorisation.address = null;
 		} catch (Exception e) {
-			return new ResponseEntity<PollResponse>(new PollResponse(PollResponseStatus.LOGIN_FAILURE), HttpStatus.OK);
+			return new ResponseEntity<PollResponse>(new PollResponse(AuthenticationStatus.LOGIN_FAILURE), HttpStatus.OK);
 		}
 
-		return new ResponseEntity<PollResponse>(new PollResponse(PollResponseStatus.LOGIN_SUCCESS), HttpStatus.OK);
+		return new ResponseEntity<PollResponse>(new PollResponse(AuthenticationStatus.LOGIN_SUCCESS), HttpStatus.OK);
 	}
 
 	@RequestMapping(method = GET, value = "/accounts")
