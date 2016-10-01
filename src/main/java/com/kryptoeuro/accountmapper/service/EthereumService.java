@@ -3,6 +3,7 @@ package com.kryptoeuro.accountmapper.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
@@ -84,6 +85,15 @@ public class EthereumService {
 		}
 	}
 
+	private String getParityAuthCredentials() throws IOException {
+		File file = new File(System.getProperty("user.home"), ".ParityNodeAuthCreds");
+		try {
+			return toString(new FileInputStream(file));
+		} catch (IOException e) {
+			throw new IOException("Cannot load parity node authentication credentials. Make sure " + file.toString() + " exists and contains the username:password string.\n" + e.toString());
+		}
+	}
+
 	private long getTransactionCount(String account) throws IOException {
 		String result = send(json("eth_getTransactionCount", account, "latest"));
 		return Long.parseLong(without0x(result), 16);
@@ -102,6 +112,12 @@ public class EthereumService {
 		StringEntity params = new StringEntity(json);
 		request.addHeader("content-type", "application/json");
 		request.setEntity(params);
+
+		byte[] plainCredsBytes = getParityAuthCredentials().getBytes();
+		byte[] base64CredsBytes = Base64.encodeBase64(plainCredsBytes);
+		String base64Creds = new String(base64CredsBytes);
+		request.addHeader("Authorization", "Basic " + base64Creds);
+
 		HttpResponse response = httpClient.execute(request);
 		if (response.getStatusLine().getStatusCode() != 200)
 			throw new IOException(response.getStatusLine().toString());
