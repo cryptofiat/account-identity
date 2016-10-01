@@ -109,7 +109,7 @@ public class AccountMapperController {
 		return new ResponseEntity<AccountActivationResponse>(new AccountActivationResponse(AuthenticationStatus.LOGIN_SUCCESS, AuthorisationType.MOBILE_ID), HttpStatus.OK);
 	}
 
-	@ApiOperation(value = "[Prototype for Bank Transfer based account registration] Validate signed authIdentifier & owner ID, store new account-identity mapping and activate ethereum account")
+	@ApiOperation(value = "[Prototype for Bank Transfer based account registration] Validate signed authIdentifier, store new account-identity mapping and activate ethereum account [BASIC AUTH]")
 	@RequestMapping(
 			method = PUT,
 			value = "/accounts",
