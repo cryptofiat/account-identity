@@ -81,6 +81,9 @@ public class AccountMapperController {
 		String paymentReference = null;
 		while (1 == 1) {
 			paymentReference = paymentReferenceService.getRandomPaymentReference();
+			if (pendingAuthorisationService.findByPaymentReference(paymentReference) == null) {
+//				pendingAuthorisationService
+			}
 			break;
 		}
 
@@ -116,7 +119,7 @@ public class AccountMapperController {
 		if (mobileIdAuthService.isLoginComplete(mobileIDSession)) {
 			pendingAuthorisationService.expire(pendingAuthorisation);
 		} else {
-			return new ResponseEntity<AccountActivationResponse>(responseBuilder.authenticationStatus(AuthenticationStatus.LOGIN_EXPIRED.name()).build(), HttpStatus.OK);
+			return new ResponseEntity<AccountActivationResponse>(responseBuilder.authenticationStatus(AuthenticationStatus.LOGIN_PENDING.name()).build(), HttpStatus.OK);
 		}
 
 		EthereumAccount newAccount;
