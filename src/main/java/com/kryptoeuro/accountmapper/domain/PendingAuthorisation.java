@@ -23,4 +23,5 @@ public class PendingAuthorisation {
 	private AuthorisationType type;
 	private String address;
 	private String serialisedMobileIdSession;
+	private String bankTransferPaymentReference;
 }
