@@ -24,11 +24,11 @@ public class PendingAuthorisationService {
 	@Autowired
 	PaymentReferenceService paymentReferenceService;
 
-	public PendingAuthorisation store(String accountPublicKey, String accountAddress) {
+	public PendingAuthorisation store(String accountAddress) {
 		try {
 			PendingAuthorisation newPendingAuthorisation = PendingAuthorisation.builder()
 					.type(AuthorisationType.BANK_TRANSFER)
-					.publicKey(accountPublicKey)
+				//	.publicKey(accountPublicKey)
 					.address(accountAddress)
 					.authIdentifier(UUID.randomUUID())
 					.build();
@@ -38,12 +38,12 @@ public class PendingAuthorisationService {
 		}
 	}
 
-	public PendingAuthorisation store(String accountPublicKey, String accountAddress, MobileIDSession mobileIDSession) {
+	public PendingAuthorisation store(String accountAddress, MobileIDSession mobileIDSession) {
 		try {
 			PendingAuthorisation newPendingAuthorisation = PendingAuthorisation.builder()
 					.type(AuthorisationType.MOBILE_ID)
 					.serialisedMobileIdSession(mobileIDSession.toString())
-					.publicKey(accountPublicKey)
+				//	.publicKey(accountPublicKey)
 					.address(accountAddress)
 					.authIdentifier(UUID.randomUUID())
 					.build();

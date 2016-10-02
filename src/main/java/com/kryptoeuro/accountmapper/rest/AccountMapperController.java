@@ -63,13 +63,13 @@ public class AccountMapperController {
 			MobileIDSession mobileIDSession = mobileIdAuthService.startLogin(authenticateCommand.getPhoneNumber());
 			pendingAuthorisation = pendingAuthorisationService.store(
 					// TODO: Use better types here (not strings)
-					authenticateCommand.getAccountPublicKey(),
+					//authenticateCommand.getAccountPublicKey(),
 					Hex.toHexString(authenticateCommand.getAccountAddress()),
 					mobileIDSession);
 		} //Bank transfer
 		else {
 			pendingAuthorisation = pendingAuthorisationService.store(
-					authenticateCommand.getAccountPublicKey(),
+					//authenticateCommand.getAccountPublicKey(),
 					Hex.toHexString(authenticateCommand.getAccountAddress()));
 		}
 

@@ -12,14 +12,18 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 public class AuthenticateCommand {
 	@NotNull
-	String accountPublicKey; // TODO: comment that this should be in ASN.1 format (e.g. 65 or 33 bytes), in hex; refactor the types here also.
+	String accountAddress; 
+	//TODO: Address should be enough to verify the ecrecover signature
+	//String accountPublicKey; // TODO: comment that this should be in ASN.1 format (e.g. 65 or 33 bytes), in hex; refactor the types here also.
 	String phoneNumber;
-
+    
     public ECKey getAccountPublicKeyParsedForm() {
-        return ECKey.fromPublicOnly(Hex.decode(accountPublicKey));
+        return ECKey.fromPublicOnly(Hex.decode("aabbccdd")); // just put in some random string
+        //return ECKey.fromPublicOnly(Hex.decode(accountPublicKey));
     }
 
     public byte[] getAccountAddress() {
-        return getAccountPublicKeyParsedForm().getAddress();
+        return Hex.decode(accountAddress);
+        //return getAccountPublicKeyParsedForm().getAddress();
     }
 }
