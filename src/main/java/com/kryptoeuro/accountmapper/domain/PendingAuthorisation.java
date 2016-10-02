@@ -1,5 +1,10 @@
 package com.kryptoeuro.accountmapper.domain;
 
+import static org.ethereum.crypto.HashUtil.sha3;
+
+import org.ethereum.crypto.ECKey;
+import org.spongycastle.util.encoders.Hex;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,6 +27,22 @@ public class PendingAuthorisation {
 	@Enumerated(EnumType.STRING)
 	private AuthorisationType type;
 	private String address;
+	// TODO: Better types for address and public key
+	private String publicKey;
 	private String serialisedMobileIdSession;
 	private String bankTransferPaymentReference;
+
+	public ECKey getPublicKeyParsedFrom() {
+		return ECKey.fromPublicOnly(Hex.decode(publicKey));
+	}
+
+	public byte[] getChallengeForEthereumAccountHolder() {
+		return authIdentifier.toString().getBytes();
+	}
+
+	/** @param signature	a DER-encoded ECDSA signature of the Ethereum account holder */
+	public boolean verifyChallengeSignedByEthereumAccountHolder(byte[] signature) {
+		byte[] signedHash = sha3(getChallengeForEthereumAccountHolder());
+		return getPublicKeyParsedFrom().verify(signedHash, signature);
+	}
 }

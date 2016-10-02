@@ -16,10 +16,13 @@ import com.kryptoeuro.accountmapper.service.*;
 import com.kryptoeuro.accountmapper.state.AuthenticationStatus;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+
+import org.spongycastle.util.encoders.Hex;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -58,10 +61,16 @@ public class AccountMapperController {
 		//Mobile ID
 		if (authenticateCommand.getPhoneNumber() != null) {
 			MobileIDSession mobileIDSession = mobileIdAuthService.startLogin(authenticateCommand.getPhoneNumber());
-			pendingAuthorisation = pendingAuthorisationService.store(authenticateCommand.getAccountAddress(), mobileIDSession);
+			pendingAuthorisation = pendingAuthorisationService.store(
+					// TODO: Use better types here (not strings)
+					authenticateCommand.getAccountPublicKey(),
+					Hex.toHexString(authenticateCommand.getAccountAddress()),
+					mobileIDSession);
 		} //Bank transfer
 		else {
-			pendingAuthorisation = pendingAuthorisationService.store(authenticateCommand.getAccountAddress());
+			pendingAuthorisation = pendingAuthorisationService.store(
+					authenticateCommand.getAccountPublicKey(),
+					Hex.toHexString(authenticateCommand.getAccountAddress()));
 		}
 
 		return new ResponseEntity<AuthenticateResponse>(AuthenticateResponse.fromPendingAuthorisation(pendingAuthorisation), HttpStatus.OK);
@@ -76,9 +85,9 @@ public class AccountMapperController {
 		String ownerId = principal.getName();
 		HttpStatus status = HttpStatus.OK;
 
-		List<EthereumAccount> existingAccounts = accountManagementService.getAccountsByAccountAddress(authenticateCommand.getAccountAddress());
+		List<EthereumAccount> existingAccounts = accountManagementService.getAccountsByAccountAddress(Hex.toHexString(authenticateCommand.getAccountAddress()));
 		if(existingAccounts.size() == 0) {
-			EthereumAccount account = accountManagementService.storeNewAccount(authenticateCommand.getAccountAddress(), ownerId, AuthorisationType.ID_CARD);
+			EthereumAccount account = accountManagementService.storeNewAccount(Hex.toHexString(authenticateCommand.getAccountAddress()), ownerId, AuthorisationType.ID_CARD);
 			if(accountActivationEnabled) {
 				try {
 					ethereumService.activateEthereumAccount(account.getAddress());
@@ -136,6 +145,13 @@ public class AccountMapperController {
 		}
 
 		responseBuilder.ownerId(mobileIDSession.personalCode);
+
+		// TODO: Make a better API here, so that the client would not have to submit the signature every time.
+		if(StringUtils.hasText(pollCommand.getSignature())) { // TODO: Remove this if-statement when client-side is finished (i.e., make signatures mandatory)
+			if(!pendingAuthorisation.verifyChallengeSignedByEthereumAccountHolder(pollCommand.getSignatureParsedForm())) {
+				return new ResponseEntity<AccountActivationResponse>(responseBuilder.authenticationStatus(AuthenticationStatus.LOGIN_INVALID_SIGNATURE.name()).build(), HttpStatus.OK);
+			}
+		}
 
 		// Check if authenticated
 		if (mobileIdAuthService.isLoginComplete(mobileIDSession)) {
