@@ -24,9 +24,9 @@ run()
 
 set_emoji()
 {
-  if [ "$LEVEL" == "ok" ]; then
+  if [ "$LEVEL" = "ok" ]; then
   	EMOJI=":white_check_mark:"
-  elif [ "$LEVEL" == "warn" ]; then
+  elif [ "$LEVEL" = "warn" ]; then
   	EMOJI=":grey_exclamation:"
   else
   	EMOJI=":exclamation:"
