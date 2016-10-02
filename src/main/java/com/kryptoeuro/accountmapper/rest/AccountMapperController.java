@@ -108,7 +108,7 @@ public class AccountMapperController {
 
 	@ApiOperation(value = "Submit signed authIdentifier and get bank transfer payment reference for account activation")
 	@RequestMapping(
-			method = GET,
+			method = POST,
 			value = "/authorisations/paymentReferences",
 			consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<PaymentReferenceResponse> getBankTransferReference(@Valid @RequestBody GetPaymentReferenceCommand cmd) {
