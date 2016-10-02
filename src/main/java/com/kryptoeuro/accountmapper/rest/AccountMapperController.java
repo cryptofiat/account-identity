@@ -119,8 +119,9 @@ public class AccountMapperController {
 		if (pendingAuthorisation == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-
-		pendingAuthorisationService.addPaymentReferenceToPendingAuthorisation(pendingAuthorisation);
+		if (pendingAuthorisation.getBankTransferPaymentReference() == null) {
+			pendingAuthorisationService.addPaymentReferenceToPendingAuthorisation(pendingAuthorisation);
+		}
 
 		return new ResponseEntity<PaymentReferenceResponse>(PaymentReferenceResponse.fromPendingAuthorisation(pendingAuthorisation), HttpStatus.OK);
 	}
