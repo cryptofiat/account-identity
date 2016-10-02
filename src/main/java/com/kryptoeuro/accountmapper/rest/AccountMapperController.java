@@ -23,7 +23,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.io.IOException;
+import java.security.Principal;
 import java.util.Base64;
+import java.util.List;
 
 import static org.springframework.web.bind.annotation.RequestMethod.*;
 
@@ -64,6 +67,36 @@ public class AccountMapperController {
 		}
 
 		return new ResponseEntity<AuthenticateResponse>(AuthenticateResponse.fromPendingAuthorisation(pendingAuthorisation), HttpStatus.OK);
+	}
+
+	@ApiOperation(value = "Associate created address with ID card")
+	@RequestMapping(
+			method = POST,
+			value = "/authorisations/idCards",
+			consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public ResponseEntity<AccountActivationResponse> authenticateIdCard(@Valid @RequestBody AuthenticateCommand authenticateCommand, Principal principal) {
+		String ownerId = principal.getName();
+		HttpStatus status = HttpStatus.OK;
+
+		List<EthereumAccount> existingAccounts = accountManagementService.getAccountsByAccountAddress(authenticateCommand.getAccountAddress());
+		if(existingAccounts.size() == 0) {
+			EthereumAccount account = accountManagementService.storeNewAccount(authenticateCommand.getAccountAddress(), ownerId, AuthorisationType.ID_CARD);
+			if(accountActivationEnabled) {
+				try {
+					ethereumService.activateEthereumAccount(account.getAddress());
+					accountManagementService.markActivated(account);
+				} catch (IOException e) {
+					status = HttpStatus.INTERNAL_SERVER_ERROR;
+				}
+			}
+		} else {
+			status = HttpStatus.BAD_REQUEST;
+		}
+
+		return new ResponseEntity<>(AccountActivationResponse.builder()
+						.authenticationStatus(AuthenticationStatus.LOGIN_SUCCESS.name())
+						.ownerId(ownerId)
+						.build(), status);
 	}
 
 	@ApiOperation(value = "Submit signed authIdentifier and get bank transfer payment reference for account activation")
@@ -188,4 +221,6 @@ public class AccountMapperController {
 		accountManagementService.removeAccountById(mappingId);
 		return new ResponseEntity<AccountsResponse>(AccountsResponse.fromEthereumAccounts(accountManagementService.getAllAccounts()), HttpStatus.OK);
 	}
+
+
 }
