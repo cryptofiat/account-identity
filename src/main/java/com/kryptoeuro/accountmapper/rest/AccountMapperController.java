@@ -161,7 +161,7 @@ public class AccountMapperController {
 		return new ResponseEntity<AccountActivationResponse>(responseBuilder.authenticationStatus(AuthenticationStatus.LOGIN_SUCCESS.name()).build(), HttpStatus.OK);
 	}
 
-	@ApiOperation(value = "[Prototype for Bank Transfer based account registration] Validate signed authIdentifier, store new account-identity mapping and activate ethereum account [BASIC AUTH]")
+	@ApiOperation(value = "[Bank Transfer based account registration] Validate signed authIdentifier, store new account-identity mapping and activate ethereum account [BASIC AUTH]")
 	@RequestMapping(
 			method = PUT,
 			value = "/accounts",
@@ -179,7 +179,7 @@ public class AccountMapperController {
 			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 		}
 
-		PendingAuthorisation pendingAuthorisation = pendingAuthorisationService.findByAuthIdentifier(cmd.getAuthIdentifier());
+		PendingAuthorisation pendingAuthorisation = pendingAuthorisationService.findByPaymentReference(cmd.getPaymentReference());
 		if (pendingAuthorisation == null) {
 			return new ResponseEntity<AccountActivationResponse>(responseBuilder.authenticationStatus(AuthenticationStatus.LOGIN_EXPIRED.name()).build(), HttpStatus.OK);
 		}
