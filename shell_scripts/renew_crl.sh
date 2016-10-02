@@ -108,19 +108,19 @@ output()
 ### Send error notification
 error()
 {
-	./slack_notify.sh alert "$*"
+	${SLACK_NOTIFIER} alert "$*"
 }
 
 ### Send 'ok' notification
 notify()
 {
-	./slack_notify.sh ok "$*"
+	${SLACK_NOTIFIER} ok "$*"
 }
 
 ### Send 'warn' notification
 warn()
 {
-	./slack_notify.sh warn "$*"
+	${SLACK_NOTIFIER} warn "$*"
 }
 
 ### Download a given CRL
