@@ -74,22 +74,26 @@ public class AccountMapperController {
 	public ResponseEntity<AccountActivationResponse> authorizeMobileIdAndCreateAccountIdentityMapping(@Valid @RequestBody PollCommand pollCommand) {
 		PendingAuthorisation pendingAuthorisation = pendingAuthorisationService.findByAuthIdentifier(pollCommand.getAuthIdentifier());
 
+		AccountActivationResponse.AccountActivationResponseBuilder responseBuilder = AccountActivationResponse.getBuilderForAuthType(AuthorisationType.MOBILE_ID);
+
 		if (pendingAuthorisation == null) {
-			return new ResponseEntity<AccountActivationResponse>(new AccountActivationResponse(AuthenticationStatus.LOGIN_EXPIRED, AuthorisationType.MOBILE_ID), HttpStatus.OK);
+			return new ResponseEntity<AccountActivationResponse>(responseBuilder.status(AuthenticationStatus.LOGIN_EXPIRED).build(), HttpStatus.OK);
 		}
 
 		MobileIDSession mobileIDSession = MobileIDSession.fromString(pendingAuthorisation.getSerialisedMobileIdSession());
 		String accountAddress = pendingAuthorisation.getAddress();
 
 		if (mobileIDSession == null || accountAddress == null) {
-			return new ResponseEntity<AccountActivationResponse>(new AccountActivationResponse(AuthenticationStatus.LOGIN_EXPIRED, AuthorisationType.MOBILE_ID), HttpStatus.OK);
+			return new ResponseEntity<AccountActivationResponse>(responseBuilder.status(AuthenticationStatus.LOGIN_EXPIRED).build(), HttpStatus.OK);
 		}
+
+		responseBuilder.ownerId(mobileIDSession.personalCode);
 
 		// Check if authenticated
 		if (mobileIdAuthService.isLoginComplete(mobileIDSession)) {
 			pendingAuthorisationService.expire(pendingAuthorisation);
 		} else {
-			return new ResponseEntity<AccountActivationResponse>(new AccountActivationResponse(AuthenticationStatus.LOGIN_PENDING, AuthorisationType.MOBILE_ID), HttpStatus.OK);
+			return new ResponseEntity<AccountActivationResponse>(responseBuilder.status(AuthenticationStatus.LOGIN_PENDING).build(), HttpStatus.OK);
 		}
 
 		EthereumAccount newAccount;
@@ -101,12 +105,12 @@ public class AccountMapperController {
 			}
 		} catch (Exception e) {
             log.error("Login failure", e);
-			return new ResponseEntity<AccountActivationResponse>(new AccountActivationResponse(AuthenticationStatus.LOGIN_FAILURE, AuthorisationType.MOBILE_ID), HttpStatus.OK);
+			return new ResponseEntity<AccountActivationResponse>(responseBuilder.status(AuthenticationStatus.LOGIN_FAILURE).build(), HttpStatus.OK);
 		}
 
 		accountManagementService.markActivated(newAccount);
 
-		return new ResponseEntity<AccountActivationResponse>(new AccountActivationResponse(AuthenticationStatus.LOGIN_SUCCESS, AuthorisationType.MOBILE_ID), HttpStatus.OK);
+		return new ResponseEntity<AccountActivationResponse>(responseBuilder.status(AuthenticationStatus.LOGIN_SUCCESS).build(), HttpStatus.OK);
 	}
 
 	@ApiOperation(value = "[Prototype for Bank Transfer based account registration] Validate signed authIdentifier, store new account-identity mapping and activate ethereum account [BASIC AUTH]")
@@ -116,6 +120,8 @@ public class AccountMapperController {
 			consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<AccountActivationResponse> authorizeBankTransferAndCreateAccountIdentityMapping(@Valid @RequestBody BankTransferBasedAccountRegistrationCommand cmd,
 																										  @RequestHeader(value = "Authorization") String authorization) {
+		AccountActivationResponse.AccountActivationResponseBuilder responseBuilder = AccountActivationResponse.getBuilderForAuthType(AuthorisationType.BANK_TRANSFER).ownerId(cmd.getOwnerId());
+
 		//Wow, such authorization, much secure
 		try {
 			if (authorization == null || !ethereumService.getParityAuthCredentials().equals(new String(Base64.getDecoder().decode(authorization.replace("Basic ", "")))))
@@ -127,7 +133,7 @@ public class AccountMapperController {
 
 		PendingAuthorisation pendingAuthorisation = pendingAuthorisationService.findByAuthIdentifier(cmd.getAuthIdentifier());
 		if (pendingAuthorisation == null) {
-			return new ResponseEntity<AccountActivationResponse>(new AccountActivationResponse(AuthenticationStatus.LOGIN_EXPIRED, AuthorisationType.BANK_TRANSFER), HttpStatus.OK);
+			return new ResponseEntity<AccountActivationResponse>(responseBuilder.status(AuthenticationStatus.LOGIN_EXPIRED).build(), HttpStatus.OK);
 		}
 
 		EthereumAccount newAccount = accountManagementService.storeNewAccount(pendingAuthorisation.getAddress(), cmd.getOwnerId(), AuthorisationType.BANK_TRANSFER);
@@ -137,7 +143,7 @@ public class AccountMapperController {
 		accountManagementService.markActivated(newAccount);
 		pendingAuthorisationService.expire(pendingAuthorisation);
 
-		return new ResponseEntity<AccountActivationResponse>(new AccountActivationResponse(AuthenticationStatus.LOGIN_SUCCESS, AuthorisationType.BANK_TRANSFER), HttpStatus.OK);
+		return new ResponseEntity<AccountActivationResponse>(responseBuilder.status(AuthenticationStatus.LOGIN_SUCCESS).build(), HttpStatus.OK);
 	}
 
 
