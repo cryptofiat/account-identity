@@ -93,10 +93,12 @@ public class AccountMapperController {
 					ethereumService.activateEthereumAccount(account.getAddress());
 					accountManagementService.markActivated(account);
 				} catch (IOException e) {
+					log.error("failed to activate account "+ account.getAddress()+" on Ethereum", e);
 					status = HttpStatus.INTERNAL_SERVER_ERROR;
 				}
 			}
 		} else {
+			log.error("Refusing to activate account: {0} binding(s) found already", existingAccounts.size());
 			status = HttpStatus.BAD_REQUEST;
 		}
 
