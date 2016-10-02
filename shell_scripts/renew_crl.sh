@@ -64,6 +64,7 @@ EXPR="/usr/bin/expr";
 IS_RUNNING_CMD="/sbin/pidof /usr/sbin/httpd";
 RELOAD_CMD="/usr/sbin/apachectl restart";
 NEXTUPDATE="${OPENSSL} crl -nextupdate -noout";
+FILE_OWNER="www-data:www-data"
 
 #### Directory with CRLs to be updated #####
 CRL_PATH="/etc/apache2/certs/eid/crl"
@@ -134,6 +135,9 @@ get()
 	fi
 
 	${OPENSSL} crl -in "${file}" -out "${file}" -inform DER
+
+	# Assign ownership
+	chown ${FILE_OWNER} ${file}
 
 	# Make symlink
 	symlink="`${OPENSSL} crl -hash -noout -in ${file}`.r0";
