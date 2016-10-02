@@ -21,6 +21,9 @@ public class PendingAuthorisationService {
 	@Autowired
 	PendingAuthorisationRepository pendingAuthorisationRepository;
 
+	@Autowired
+	PaymentReferenceService paymentReferenceService;
+
 	public PendingAuthorisation store(String accountAddress) {
 		try {
 			PendingAuthorisation newPendingAuthorisation = PendingAuthorisation.builder()
@@ -46,6 +49,18 @@ public class PendingAuthorisationService {
 		} catch (Exception e) {
 			throw new CannotStorePendingAuthorisationException("Crashed while storing pending authorisation", e.getCause());
 		}
+	}
+
+	public PendingAuthorisation addPaymentReferenceToPendingAuthorisation(PendingAuthorisation pendingAuthorisation) {
+		String paymentReference = null;
+
+		//Wow such duplicate check, much unique
+		while (true) {
+			paymentReference = paymentReferenceService.getRandomPaymentReference();
+			if (findByPaymentReference(paymentReference) == null) break;
+		}
+		pendingAuthorisation.setBankTransferPaymentReference(paymentReference);
+		return pendingAuthorisationRepository.save(pendingAuthorisation);
 	}
 
 	public PendingAuthorisation findByAuthIdentifier(UUID authIdentifier) {

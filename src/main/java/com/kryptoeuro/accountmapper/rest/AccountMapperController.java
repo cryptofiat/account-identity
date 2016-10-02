@@ -40,8 +40,6 @@ public class AccountMapperController {
 	AccountManagementService accountManagementService;
 	@Autowired
 	PendingAuthorisationService pendingAuthorisationService;
-	@Autowired
-	PaymentReferenceService paymentReferenceService;
 
 	private static boolean accountActivationEnabled = true;
 
@@ -78,16 +76,7 @@ public class AccountMapperController {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 
-		String paymentReference = null;
-		while (1 == 1) {
-			paymentReference = paymentReferenceService.getRandomPaymentReference();
-			if (pendingAuthorisationService.findByPaymentReference(paymentReference) == null) {
-//				pendingAuthorisationService
-			}
-			break;
-		}
-
-//		pendingAuthorisation.setBankTransferPaymentReference();
+		pendingAuthorisationService.addPaymentReferenceToPendingAuthorisation(pendingAuthorisation);
 
 		return new ResponseEntity<PaymentReferenceResponse>(PaymentReferenceResponse.fromPendingAuthorisation(pendingAuthorisation), HttpStatus.OK);
 	}
