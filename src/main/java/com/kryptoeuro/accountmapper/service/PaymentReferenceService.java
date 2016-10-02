@@ -7,9 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.InputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.UUID;
 
 @Service
@@ -23,18 +23,13 @@ public class PaymentReferenceService {
 	String randomWordApiUrl = "http://www.setgetgo.com/randomword/get.php"; //Random word api
 
 	public String getRandomPaymentReference() {
-		return getRandomWord().toLowerCase() + " " + getRandomWord().toLowerCase();
-	}
-
-	private String getRandomWord() {
 		try {
-			URL url = new URL(randomWordApiUrl);
-			URLConnection conn = url.openConnection();
-			InputStream is = conn.getInputStream();
-			return is.toString();
+			URL oracle = new URL(randomWordApiUrl);
+			return new BufferedReader(new InputStreamReader(oracle.openStream())).readLine().toLowerCase()
+					+ " "
+					+ new BufferedReader(new InputStreamReader(oracle.openStream())).readLine().toLowerCase();
 		} catch (Exception e) {
-			return UUID.randomUUID().toString();
+			return UUID.randomUUID().toString().toLowerCase();
 		}
 	}
-
 }
