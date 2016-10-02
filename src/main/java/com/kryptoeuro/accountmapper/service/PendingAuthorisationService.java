@@ -52,6 +52,10 @@ public class PendingAuthorisationService {
 		return pendingAuthorisationRepository.findByAuthIdentifier(authIdentifier);
 	}
 
+	public PendingAuthorisation findByPaymentReference(String paymentReference) {
+		return pendingAuthorisationRepository.findByBankTransferPaymentReference(paymentReference);
+	}
+
 	public void expire(PendingAuthorisation pendingAuthorisation) {
 		pendingAuthorisationRepository.delete(pendingAuthorisation);
 	}

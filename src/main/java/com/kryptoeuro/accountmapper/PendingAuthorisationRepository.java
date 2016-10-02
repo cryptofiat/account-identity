@@ -11,5 +11,7 @@ public interface PendingAuthorisationRepository extends CrudRepository<PendingAu
 
 	PendingAuthorisation findByAuthIdentifier(UUID authIdentifier);
 
+	PendingAuthorisation findByBankTransferPaymentReference(String bankTransferPaymentReference);
+
 	void delete(PendingAuthorisation pendingAuthorisation);
 }
