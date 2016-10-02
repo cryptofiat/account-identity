@@ -65,9 +65,11 @@ IS_RUNNING_CMD="/sbin/pidof /usr/sbin/httpd";
 RELOAD_CMD="/usr/sbin/apachectl restart";
 NEXTUPDATE="${OPENSSL} crl -nextupdate -noout";
 FILE_OWNER="www-data:www-data"
+EID_DIR="/etc/apache2/certs/eid"
+SLACK_NOTIFIER="${EID_DIR}/slack_notify.sh"
 
 #### Directory with CRLs to be updated #####
-CRL_PATH="/etc/apache2/certs/eid/crl"
+CRL_PATH="${EID_DIR}/crl"
 
 ### Subject of the email
 MAIL_SUBJECT="ESTEID CRL Update Error";
