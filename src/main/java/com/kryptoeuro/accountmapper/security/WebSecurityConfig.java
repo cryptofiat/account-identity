@@ -30,7 +30,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
-	private UserDetailsService idCardUserDetailsService() {
+	public UserDetailsService idCardUserDetailsService() {
 		return IdCardUser::new;
 	}
 }
