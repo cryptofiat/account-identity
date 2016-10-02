@@ -158,7 +158,7 @@ public class AccountMapperController {
 
 		accountManagementService.markActivated(newAccount);
 
-		return new ResponseEntity<AccountActivationResponse>(responseBuilder.authenticationStatus(AuthenticationStatus.LOGIN_EXPIRED.name()).build(), HttpStatus.OK);
+		return new ResponseEntity<AccountActivationResponse>(responseBuilder.authenticationStatus(AuthenticationStatus.LOGIN_SUCCESS.name()).build(), HttpStatus.OK);
 	}
 
 	@ApiOperation(value = "[Prototype for Bank Transfer based account registration] Validate signed authIdentifier, store new account-identity mapping and activate ethereum account [BASIC AUTH]")
@@ -184,14 +184,23 @@ public class AccountMapperController {
 			return new ResponseEntity<AccountActivationResponse>(responseBuilder.authenticationStatus(AuthenticationStatus.LOGIN_EXPIRED.name()).build(), HttpStatus.OK);
 		}
 
-		EthereumAccount newAccount = accountManagementService.storeNewAccount(pendingAuthorisation.getAddress(), cmd.getOwnerId(), AuthorisationType.BANK_TRANSFER);
-		if (accountActivationEnabled) {
-//			ethereumService.activateEthereumAccount(newAccount.getAddress());
+		EthereumAccount newAccount;
+		try {
+			newAccount = accountManagementService.storeNewAccount(pendingAuthorisation.getAddress(), cmd.getOwnerId(), AuthorisationType.BANK_TRANSFER);
+
+			if (accountActivationEnabled) {
+				ethereumService.activateEthereumAccount(newAccount.getAddress());
+			}
+		} catch (Exception e) {
+			log.error("Login failure", e);
+			return new ResponseEntity<AccountActivationResponse>(responseBuilder.authenticationStatus(AuthenticationStatus.LOGIN_EXPIRED.name()).build(), HttpStatus.OK);
 		}
+
+
 		accountManagementService.markActivated(newAccount);
 		pendingAuthorisationService.expire(pendingAuthorisation);
 
-		return new ResponseEntity<AccountActivationResponse>(responseBuilder.authenticationStatus(AuthenticationStatus.LOGIN_EXPIRED.name()).build(), HttpStatus.OK);
+		return new ResponseEntity<AccountActivationResponse>(responseBuilder.authenticationStatus(AuthenticationStatus.LOGIN_SUCCESS.name()).build(), HttpStatus.OK);
 	}
 
 
