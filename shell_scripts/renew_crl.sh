@@ -103,10 +103,22 @@ output()
 	fi
 }
 
-### Send error email
+### Send error notification
 error()
 {
-	./slack_notify.sh "${MAIL_SUBJECT}\n$*"
+	./slack_notify.sh alert "$*"
+}
+
+### Send 'ok' notification
+notify()
+{
+	./slack_notify.sh ok "$*"
+}
+
+### Send 'warn' notification
+warn()
+{
+	./slack_notify.sh warn "$*"
 }
 
 ### Download a given CRL
@@ -130,7 +142,7 @@ get()
 	### Download
 	if ! test -s "$file"
 	then
-		output "Geting $url -> $file"
+		output "Getting $url -> $file"
 		${WGET} -q "$url" -O "$file"
 	fi
 
@@ -159,7 +171,7 @@ check()
 
 	if test -z "$file"
 	then
-		output "Error: empty file (url=$url)";
+		error "Error: empty file (url=$url)";
 		return;
 	fi
 
@@ -211,7 +223,7 @@ check()
 		#
 		if test ${NEXT_RUN} -gt $need_update
 		then
-			output "NB! CRL expires before next run";
+			warn "NB! CRL expires before next run. Re-scheduling next run.";
 			now=`${DATE} +"%s"`;
 			MY_SLEEP=`${EXPR} $need_update - $now`;
 			if test -z "$DO_SLEEP" || test $DO_SLEEP -gt $MY_SLEEP
@@ -238,6 +250,8 @@ run()
 		#expired_26.08.2016 check "https://sk.ee/crls/esteid/esteid2007.crl"
 		check "https://sk.ee/repository/crls/esteid2011.crl"
 		check "https://sk.ee/crls/esteid/esteid2015.crl"
+
+		notify "Checked and hopefully updated all CRLs"
 
 		# Reload apache
 		$RELOAD_CMD || error "Failed to reload Apache";
