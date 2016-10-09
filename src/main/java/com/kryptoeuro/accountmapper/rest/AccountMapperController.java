@@ -64,7 +64,7 @@ public class AccountMapperController {
 			pendingAuthorisation = pendingAuthorisationService.store(
 					// TODO: Use better types here (not strings)
 					//authenticateCommand.getAccountPublicKey(),
-					Hex.toHexString(authenticateCommand.accountAddress),
+					Hex.toHexString(authenticateCommand.getAccountAddress()),
 					mobileIDSession);
 		} //Bank transfer
 		else {
