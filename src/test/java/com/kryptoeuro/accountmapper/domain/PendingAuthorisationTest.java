@@ -18,6 +18,7 @@ import java.util.UUID;
 public class PendingAuthorisationTest {
     private ECKey usersPrivateKey = new ECKey();
 
+/*
     private PendingAuthorisation pendingAuthorisation = new PendingAuthorisation() {{
         setAuthIdentifier(UUID.randomUUID());
 
@@ -32,7 +33,7 @@ public class PendingAuthorisationTest {
         byte[] signatureAsDer = convertEthereumSignatureToDer(Base64.decode(signature.toBase64()));
         assertTrue(pendingAuthorisation.verifyChallengeSignedByEthereumAccountHolder(signatureAsDer));
     }
-/*
+
     @Test
     public void failedVerificationOfChallengeSignedByEthAccountHolder_invalidSignature() {
         byte[] invalidSignature = convertEthereumSignatureToDer(new byte[65]);

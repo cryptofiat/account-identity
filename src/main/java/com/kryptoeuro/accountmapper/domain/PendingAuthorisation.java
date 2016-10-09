@@ -28,7 +28,7 @@ public class PendingAuthorisation {
 	private AuthorisationType type;
 	private String address;
 	// TODO: Better types for address and public key
-	private String publicKey;
+	// private String publicKey;
 	private String serialisedMobileIdSession;
 	private String bankTransferPaymentReference;
 /*
