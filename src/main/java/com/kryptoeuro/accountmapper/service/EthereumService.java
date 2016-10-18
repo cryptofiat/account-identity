@@ -60,9 +60,12 @@ public class EthereumService {
 
 	private String sendTransaction(ECKey signer, byte[] callData) throws IOException {
 		long transactionCount = getTransactionCount(hex(signer.getAddress()));
+		long gasPriceLong = getGasPrice();
+		log.info("Current gas price: " + String.valueOf(gasPriceLong));
 		byte[] nonce = ByteUtil.longToBytesNoLeadZeroes(transactionCount);
 
-		byte[] gasPrice = ByteUtil.longToBytesNoLeadZeroes(30000000000L);
+		//byte[] gasPrice = ByteUtil.longToBytesNoLeadZeroes(30000000000L);
+		byte[] gasPrice = ByteUtil.longToBytesNoLeadZeroes(Math.round(gasPriceLong * 1.2));
 		byte[] gasLimit = ByteUtil.longToBytesNoLeadZeroes(200000);
 
 		byte[] toAddress = Hex.decode(without0x(contractAddress));
@@ -99,6 +102,11 @@ public class EthereumService {
 
 	private long getTransactionCount(String account) throws IOException {
 		String result = send(json("eth_getTransactionCount", account, "latest"));
+		return Long.parseLong(without0x(result), 16);
+	}
+
+	private long getGasPrice() throws IOException {
+		String result = send(json("eth_gasPrice", ""));
 		return Long.parseLong(without0x(result), 16);
 	}
 
