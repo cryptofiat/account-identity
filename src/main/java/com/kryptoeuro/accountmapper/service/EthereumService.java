@@ -106,7 +106,7 @@ public class EthereumService {
 	}
 
 	private long getGasPrice() throws IOException {
-		String result = send(json("eth_gasPrice", ""));
+		String result = send(json("eth_gasPrice"));
 		return Long.parseLong(without0x(result), 16);
 	}
 
