@@ -5,9 +5,11 @@ import org.spongycastle.util.encoders.Hex;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.validation.constraints.NotNull;
 
+@Slf4j
 @Data
 @NoArgsConstructor
 public class AuthenticateCommand {
@@ -23,6 +25,7 @@ public class AuthenticateCommand {
     }
 
     public byte[] getAccountAddress() {
+        log.info("Decoding in commmand: " + accountAddress);
         return Hex.decode(accountAddress);
         //return getAccountPublicKeyParsedForm().getAddress();
     }
