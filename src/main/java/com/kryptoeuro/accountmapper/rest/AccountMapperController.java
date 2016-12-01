@@ -84,13 +84,14 @@ public class AccountMapperController {
 	public ResponseEntity<AccountActivationResponse> authenticateIdCard(@Valid @RequestBody AuthenticateCommand authenticateCommand, Principal principal) {
 		String ownerId = principal.getName();
 		HttpStatus status = HttpStatus.OK;
+		String txHash = new String();
 
 		List<EthereumAccount> existingAccounts = accountManagementService.getAccountsByAccountAddress(Hex.toHexString(authenticateCommand.getAccountAddress()));
 		if(existingAccounts.size() == 0) {
 			EthereumAccount account = accountManagementService.storeNewAccount(Hex.toHexString(authenticateCommand.getAccountAddress()), ownerId, AuthorisationType.ID_CARD);
 			if(accountActivationEnabled) {
 				try {
-					String txHash = ethereumService.activateEthereumAccount(account.getAddress());
+					txHash = ethereumService.activateEthereumAccount(account.getAddress());
 					accountManagementService.markActivated(account,txHash);
 				} catch (IOException e) {
 					log.error("failed to activate account "+ account.getAddress()+" on Ethereum", e);
@@ -105,6 +106,7 @@ public class AccountMapperController {
 		return new ResponseEntity<>(AccountActivationResponse.builder()
 						.authenticationStatus(AuthenticationStatus.LOGIN_SUCCESS.name())
 						.ownerId(ownerId)
+						.transactionHash(txHash)
 						.build(), status);
 	}
 
@@ -178,7 +180,11 @@ public class AccountMapperController {
 
 		accountManagementService.markActivated(newAccount,txHash);
 
-		return new ResponseEntity<AccountActivationResponse>(responseBuilder.authenticationStatus(AuthenticationStatus.LOGIN_SUCCESS.name()).build(), HttpStatus.OK);
+		return new ResponseEntity<AccountActivationResponse>(responseBuilder
+				.authenticationStatus(AuthenticationStatus.LOGIN_SUCCESS.name())
+				.transactionHash(txHash)
+				.build(), 
+			HttpStatus.OK);
 	}
 
 	@ApiOperation(value = "[Bank Transfer based account registration] Validate signed authIdentifier, store new account-identity mapping and activate ethereum account [BASIC AUTH]")
