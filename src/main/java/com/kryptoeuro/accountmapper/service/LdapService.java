@@ -5,20 +5,43 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.kryptoeuro.accountmapper.response.LdapResponse;
+import com.kryptoeuro.accountmapper.LdapResponseRepository;
 
 import org.apache.directory.ldap.client.api.LdapConnection;
 import org.apache.directory.ldap.client.api.LdapNetworkConnection;
 import org.apache.directory.api.ldap.model.cursor.EntryCursor;
 import org.apache.directory.api.ldap.model.entry.Entry;
 import org.apache.directory.api.ldap.model.message.SearchScope;
+import java.util.List;
 
 @Service
 @Slf4j
 public class LdapService {
 
+	@Autowired
+	LdapResponseRepository ldapResponseRepository;
+
+	private LdapResponse tryLocalCache(long idCode) {
+		List<LdapResponse> responseList = ldapResponseRepository.findByIdCode(Long.valueOf(idCode));
+		return (responseList.isEmpty()) ? null : responseList.get(0);
+        }
+	private void storeLocalCache(LdapResponse ldapResponse) {
+		try {
+			ldapResponseRepository.save(ldapResponse);
+		} catch (Exception e) {
+			log.warn("Could not store LDAP response in local DB for ID: " + ldapResponse.toString(), e);
+		}
+        }
+
 	public LdapResponse lookupIdCode(long idCode) {
 
 		LdapResponse lResponse = LdapResponse.builder().build();
+		lResponse = tryLocalCache(idCode);
+
+		if (lResponse != null && lResponse.getIdCode() > 0) {
+			return lResponse;
+		}
+
 		LdapNetworkConnection connection = new LdapNetworkConnection("ldap.sk.ee");
 		try {
 			connection.bind();
@@ -37,8 +60,13 @@ public class LdapService {
 
 			connection.unBind();
 			connection.close();
+
+			if (lResponse != null && lResponse.getIdCode() > 0) {
+				storeLocalCache(lResponse);
+			}
+
 		} catch (Exception e) {
-			log.error("some excpetion" + e.toString());
+			log.error("Exception trying LDAP " + e.toString());
 		}
 
 		return lResponse;

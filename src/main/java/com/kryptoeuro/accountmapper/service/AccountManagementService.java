@@ -38,9 +38,10 @@ public class AccountManagementService {
 		}
 	}
 
-	public void markActivated(EthereumAccount account) {
+	public void markActivated(EthereumAccount account,String txHash) {
 		try {
 			account.setActivated(true);
+			account.setTransactionHash(txHash);
 			ethereumAccountRepository.save(account);
 		} catch (Exception e) {
 			throw new CannotStoreAccountException("Crashed while activating new account", e.getCause());

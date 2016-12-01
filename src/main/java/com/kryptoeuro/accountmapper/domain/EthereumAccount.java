@@ -18,6 +18,7 @@ public class EthereumAccount {
 
     private String ownerId;
     private String address;
+    private String transactionHash;
     private boolean activated;
     @Enumerated(EnumType.STRING)
     private AuthorisationType authorisationType;
