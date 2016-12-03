@@ -44,11 +44,12 @@ public class EthereumService {
 	private Function approveAccountFunction = Function.fromSignature("approveAccount", "address");
 	private Function appointAccountApproverFunction = Function.fromSignature("appointAccountApprover", "address");
 
-	public void activateEthereumAccount(String accountAddress) throws IOException {
+	public String activateEthereumAccount(String accountAddress) throws IOException {
 		accountAddress = with0x(accountAddress);
 		ECKey approver = getAccountApproverKey();
 		String txHash = sendTransaction(approver, approveAccountFunction.encode(accountAddress));
 		log.info("Account " + accountAddress + " approved by " + hex(approver.getAddress()) + ". TxHash=" + txHash);
+		return txHash;
 	}
 
 	public void transferAccountApprovalRight(String newAddress) throws IOException {

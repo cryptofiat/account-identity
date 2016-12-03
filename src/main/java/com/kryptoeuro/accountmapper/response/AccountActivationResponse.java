@@ -11,6 +11,7 @@ import lombok.Data;
 public class AccountActivationResponse {
 	String authenticationStatus;
 	String authorisationType;
+	String transactionHash;
 	String ownerId;
 
 	public static AccountActivationResponseBuilder getBuilderForAuthType(AuthorisationType authType) {
