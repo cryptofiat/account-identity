@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.ethereum.crypto.ECKey;
+import java.io.IOException;
 
 import com.kryptoeuro.accountmapper.domain.Escrow;
 import com.kryptoeuro.accountmapper.domain.EthereumAccount;
@@ -43,10 +44,10 @@ public class EscrowService {
 		return escrow;
 	};
 
-	public EthereumAccount approveEscrowAccountForId(long idCode) {
+	public EthereumAccount approveEscrowAccountForId(long idCode) throws IOException {
 		Escrow escrow = createEscrowKey(idCode);
 		EthereumAccount ethAccount = accountService.storeNewAccount(escrow.getAddress(), String.valueOf(escrow.getIdCode()), AuthorisationType.ESCROW);
-		String txHash = activateEthereumAccount(escrow.address);
+		String txHash = ethereumService.activateEthereumAccount(escrow.getAddress());
 		//String txHash = new String("0x123456-stub");
 		accountService.markActivated(ethAccount, txHash);
 		escrowRepository.save(escrow);

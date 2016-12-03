@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import javax.validation.Valid;
+import java.io.IOException;
 
 import com.kryptoeuro.accountmapper.error.LdapNotFoundException;
 import com.kryptoeuro.accountmapper.error.HasActiveAccountException;
@@ -43,7 +44,14 @@ public class EscrowController {
 		if (accountService.hasActivatedAccount(idCode)) { throw new HasActiveAccountException(); };
 		if (ldapService.lookupIdCode(idCode) == null) { throw new LdapNotFoundException(); };
 
-		EthereumAccount account = escrowService.approveEscrowAccountForId(idCode);
+		EthereumAccount account;
+
+		try {
+			account = escrowService.approveEscrowAccountForId(idCode);
+		} catch (IOException  e) {
+			throw new RuntimeException("IO issue when approving address",e.getCause());
+		}
+
 		AccountActivationResponse aaResponse = AccountActivationResponse.builder()
 						.authenticationStatus(AuthenticationStatus.LOGIN_SUCCESS.name())
 						.ownerId(account.getOwnerId())
