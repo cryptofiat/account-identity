@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.kryptoeuro.accountmapper.error.LdapNotFoundException;
 import com.kryptoeuro.accountmapper.response.LdapResponse;
 import com.kryptoeuro.accountmapper.LdapResponseRepository;
 
@@ -60,15 +61,17 @@ public class LdapService {
 
 			connection.unBind();
 			connection.close();
-
-			if (lResponse != null && lResponse.getIdCode() > 0) {
-				storeLocalCache(lResponse);
-			}
-
 		} catch (Exception e) {
 			log.error("Exception trying LDAP " + e.toString());
 		}
 
-		return lResponse;
+
+		if (lResponse != null && lResponse.getIdCode() > 0) {
+			storeLocalCache(lResponse);
+			return lResponse;
+		} else {
+			return null; 
+		}
+
 	}
 }

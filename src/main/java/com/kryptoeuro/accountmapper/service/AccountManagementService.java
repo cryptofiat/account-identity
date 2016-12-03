@@ -57,6 +57,14 @@ public class AccountManagementService {
 
 	}
 
+	public boolean hasActivatedAccount(long ownerId) { return hasActivatedAccount(String.valueOf(ownerId)); }
+	public boolean hasActivatedAccount(String ownerId) {
+		
+		List<EthereumAccount> approvedList = ethereumAccountRepository.findByOwnerIdAndActivated(ownerId,true);
+		log.info("checked repo for " +ownerId+ " accounts and found "+String.valueOf(approvedList.size()));
+		return !approvedList.isEmpty();
+	}
+
 	public List<EthereumAccount> getAccountsByOwnerId(String ownerId) {
 		return ethereumAccountRepository.findByOwnerId(ownerId);
 	}

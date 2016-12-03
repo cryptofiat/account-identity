@@ -77,7 +77,7 @@ public class EthereumService {
 		return send(json("eth_sendRawTransaction", hex(transaction.getEncoded())));
 	}
 
-	private String hex(byte[] bytes) {
+	protected String hex(byte[] bytes) {
 		return with0x(Hex.toHexString(bytes));
 	}
 

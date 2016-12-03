@@ -12,6 +12,7 @@ public class AccountActivationResponse {
 	String authenticationStatus;
 	String authorisationType;
 	String transactionHash;
+	String address;
 	String ownerId;
 
 	public static AccountActivationResponseBuilder getBuilderForAuthType(AuthorisationType authType) {

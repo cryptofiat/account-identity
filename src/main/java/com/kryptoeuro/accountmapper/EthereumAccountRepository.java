@@ -11,6 +11,7 @@ public interface EthereumAccountRepository extends CrudRepository<EthereumAccoun
     List<EthereumAccount> findByAddress(String accountAddress);
 
     List<EthereumAccount> findByAddressAndActivated(String accountAddress, boolean activated);
+    List<EthereumAccount> findByOwnerIdAndActivated(String accountAddress, boolean activated);
     List<EthereumAccount> findAll();
 
     void delete(Long id);
