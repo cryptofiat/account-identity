@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import com.kryptoeuro.accountmapper.response.LdapResponse;
 import com.kryptoeuro.accountmapper.service.LdapService;
+import com.kryptoeuro.accountmapper.error.LdapNotFoundException;
 
 @RestController
 @RequestMapping("/v1/ldap")
@@ -33,7 +34,7 @@ public class LdapController {
 		if (lr != null && lr.getIdCode() > 0) {
 			return new ResponseEntity<LdapResponse>(lr, HttpStatus.OK);
 		} else {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			throw new LdapNotFoundException();
 		}
 	}
 }
