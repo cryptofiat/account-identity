@@ -19,6 +19,8 @@ public class AccountManagementService {
 
 	@Autowired
 	EthereumAccountRepository ethereumAccountRepository;
+	@Autowired
+	EscrowService escrowService;
 
 	public EthereumAccount storeNewAccount(String address, String ownerId, AuthorisationType authorisationType) {
 		try {
@@ -42,7 +44,9 @@ public class AccountManagementService {
 		try {
 			account.setActivated(true);
 			account.setTransactionHash(txHash);
+
 			ethereumAccountRepository.save(account);
+			
 		} catch (Exception e) {
 			throw new CannotStoreAccountException("Crashed while activating new account", e.getCause());
 		}

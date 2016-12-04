@@ -8,6 +8,7 @@ import com.kryptoeuro.accountmapper.command.PollCommand;
 import com.kryptoeuro.accountmapper.domain.AuthorisationType;
 import com.kryptoeuro.accountmapper.domain.EthereumAccount;
 import com.kryptoeuro.accountmapper.domain.PendingAuthorisation;
+import com.kryptoeuro.accountmapper.response.EscrowTransfer;
 import com.kryptoeuro.accountmapper.response.AccountsResponse;
 import com.kryptoeuro.accountmapper.response.AuthenticateResponse;
 import com.kryptoeuro.accountmapper.response.AccountActivationResponse;
@@ -30,6 +31,7 @@ import java.io.IOException;
 import java.security.Principal;
 import java.util.Base64;
 import java.util.List;
+import java.util.ArrayList;
 
 import static org.springframework.web.bind.annotation.RequestMethod.*;
 
@@ -42,6 +44,8 @@ public class AccountMapperController {
 	MobileIdAuthService mobileIdAuthService;
 	@Autowired
 	EthereumService ethereumService;
+	@Autowired
+	EscrowService escrowService;
 	@Autowired
 	AccountManagementService accountManagementService;
 	@Autowired
@@ -246,6 +250,8 @@ public class AccountMapperController {
 		accountManagementService.removeAccountById(mappingId);
 		return new ResponseEntity<AccountsResponse>(AccountsResponse.fromEthereumAccounts(accountManagementService.getAllAccounts()), HttpStatus.OK);
 	}
+
+
 
 
 }
