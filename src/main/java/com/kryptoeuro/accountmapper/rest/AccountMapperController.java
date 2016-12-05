@@ -85,14 +85,14 @@ public class AccountMapperController {
 			method = POST,
 			value = "/authorisations/idCards",
 			consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public ResponseEntity<AccountActivationResponse> authenticateIdCard(@Valid @RequestBody AuthenticateCommand authenticateCommand, Principal principal) {
+	public ResponseEntity<AccountActivationResponse> authenticateIdCard(@Valid @RequestBody AuthenticateCommand authenticateCommand, Principal principal) throws IOException {
 		String ownerId = principal.getName();
 		HttpStatus status = HttpStatus.OK;
 		String txHash = new String();
-
+		EthereumAccount account = new EthereumAccount();
 		List<EthereumAccount> existingAccounts = accountManagementService.getAccountsByAccountAddress(Hex.toHexString(authenticateCommand.getAccountAddress()));
 		if(existingAccounts.size() == 0) {
-			EthereumAccount account = accountManagementService.storeNewAccount(Hex.toHexString(authenticateCommand.getAccountAddress()), ownerId, AuthorisationType.ID_CARD);
+			account = accountManagementService.storeNewAccount(Hex.toHexString(authenticateCommand.getAccountAddress()), ownerId, AuthorisationType.ID_CARD);
 			if(accountActivationEnabled) {
 				try {
 					txHash = ethereumService.activateEthereumAccount(account.getAddress());
@@ -111,6 +111,7 @@ public class AccountMapperController {
 						.authenticationStatus(AuthenticationStatus.LOGIN_SUCCESS.name())
 						.ownerId(ownerId)
 						.transactionHash(txHash)
+	  					.escrowTransfers(clearEscrow(account))
 						.build(), status);
 	}
 
@@ -137,7 +138,7 @@ public class AccountMapperController {
 			method = POST,
 			value = "/accounts",
 			consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public ResponseEntity<AccountActivationResponse> authorizeMobileIdAndCreateAccountIdentityMapping(@Valid @RequestBody PollCommand pollCommand) {
+	public ResponseEntity<AccountActivationResponse> authorizeMobileIdAndCreateAccountIdentityMapping(@Valid @RequestBody PollCommand pollCommand) throws IOException {
 		PendingAuthorisation pendingAuthorisation = pendingAuthorisationService.findByAuthIdentifier(pollCommand.getAuthIdentifier());
 
 		AccountActivationResponse.AccountActivationResponseBuilder responseBuilder = AccountActivationResponse.getBuilderForAuthType(AuthorisationType.MOBILE_ID);
@@ -187,6 +188,7 @@ public class AccountMapperController {
 		return new ResponseEntity<AccountActivationResponse>(responseBuilder
 				.authenticationStatus(AuthenticationStatus.LOGIN_SUCCESS.name())
 				.transactionHash(txHash)
+	  			.escrowTransfers(clearEscrow(newAccount))
 				.build(), 
 			HttpStatus.OK);
 	}
@@ -255,38 +257,15 @@ public class AccountMapperController {
 		return new ResponseEntity<AccountsResponse>(AccountsResponse.fromEthereumAccounts(accountManagementService.getAllAccounts()), HttpStatus.OK);
 	}
 
-
-	//TODO: REMOVE THIS, ONLY HERE FOR TESTING ESCROW
-
-	@ApiOperation(value = "TEST-TEST-TEST authorises any id code as ID CARD")
-	@RequestMapping(
-			method = GET,
-			value = "/authorisations/testActivate/{ownerId}/{address}")
-	public ResponseEntity<AccountActivationResponse> testActivate(@PathVariable(value="ownerId") String ownerId, @PathVariable(value="address") String address) throws  IOException, InterruptedException {
-
-		//ethereumService.testSigning();
-		EthereumAccount account = accountManagementService.storeNewAccount(address, ownerId, AuthorisationType.ID_CARD);
-		String txHash = ethereumService.activateEthereumAccount(account.getAddress());
-
-		accountManagementService.markActivated(account,txHash);
-		//accountManagementService.markActivated(account,null);
-		AccountActivationResponse response = AccountActivationResponse.builder()
-				.authenticationStatus(AuthenticationStatus.LOGIN_SUCCESS.name())
-				.ownerId(ownerId)
-				.transactionHash(txHash)
-				.build();
+	private List<EscrowTransfer> clearEscrow(EthereumAccount account) throws IOException {
 			
+	  	long idCode = Long.parseLong(account.getOwnerId());
+		String address  = account.getAddress();
 		// check if escrow
-		long idCode = Long.parseLong(account.getOwnerId());
 		List<EscrowTransfer> etxs;
 		if ( account.getAuthorisationType() != AuthorisationType.ESCROW && escrowService.getExistingEscrow(idCode) != null ) {
-			//TODO: blocking the thread, terrible idea to make sure nonce gets updated
-			Thread.sleep(1000);
-			etxs = escrowService.clearAllToAddress(idCode, account.getAddress());
-			response.setEscrowTransfers(etxs);
-		}
-
-		return new ResponseEntity<>(response, HttpStatus.OK);
+			return escrowService.clearAllToAddress(idCode,address);
+		} else return null;
 	}
 
 
