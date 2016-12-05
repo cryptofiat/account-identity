@@ -21,8 +21,11 @@ public class AccountManagementService {
 	EthereumAccountRepository ethereumAccountRepository;
 	@Autowired
 	EscrowService escrowService;
+	@Autowired
+	EthereumService ethService;
 
 	public EthereumAccount storeNewAccount(String address, String ownerId, AuthorisationType authorisationType) {
+		address = ethService.without0x(address);
 		try {
 			validateAccountStoring(address, ownerId);
 			EthereumAccount account = EthereumAccount.builder()

@@ -40,17 +40,13 @@ public class EscrowController {
 
 
 	@RequestMapping(method = RequestMethod.GET, value = "/{idCode}")
-	public ResponseEntity<AccountActivationResponse> getEscrow(@PathVariable("idCode") @Valid long idCode) {
+	public ResponseEntity<AccountActivationResponse> getEscrow(@PathVariable("idCode") @Valid long idCode) throws IOException {
 		if (accountService.hasActivatedAccount(idCode)) { throw new HasActiveAccountException(); };
 		if (ldapService.lookupIdCode(idCode) == null) { throw new LdapNotFoundException(); };
 
 		EthereumAccount account;
 
-		try {
-			account = escrowService.approveEscrowAccountForId(idCode);
-		} catch (IOException  e) {
-			throw new RuntimeException("IO issue when approving address",e.getCause());
-		}
+		account = escrowService.approveEscrowAccountForId(idCode);
 
 		AccountActivationResponse aaResponse = AccountActivationResponse.builder()
 						.authenticationStatus(AuthenticationStatus.LOGIN_SUCCESS.name())

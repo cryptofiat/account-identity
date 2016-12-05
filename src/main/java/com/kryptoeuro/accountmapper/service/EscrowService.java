@@ -54,7 +54,6 @@ public class EscrowService {
 		Escrow escrow = createEscrowKey(idCode);
 		EthereumAccount ethAccount = accountService.storeNewAccount(escrow.getAddress(), String.valueOf(escrow.getIdCode()), AuthorisationType.ESCROW);
 		String txHash = ethereumService.activateEthereumAccount(escrow.getAddress());
-		//String txHash = new String("0x123456-stub");
 		accountService.markActivated(ethAccount, txHash);
 		escrowRepository.save(escrow);
 		return ethAccount;

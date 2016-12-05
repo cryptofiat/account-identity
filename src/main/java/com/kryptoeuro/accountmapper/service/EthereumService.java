@@ -166,11 +166,11 @@ public class EthereumService {
 		return jsonNode.get("result").asText();
 	}
 
-	private String without0x(String hex) {
+	protected String without0x(String hex) {
 		return hex.startsWith("0x") ? hex.substring(2) : hex;
 	}
 
-	private String with0x(String hex) {
+	protected String with0x(String hex) {
 		return hex.startsWith("0x") ? hex : "0x" + hex;
 	}
 
