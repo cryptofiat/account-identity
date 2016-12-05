@@ -69,8 +69,17 @@ public class AccountManagementService {
 		return !approvedList.isEmpty();
 	}
 
-	public List<EthereumAccount> getAccountsByOwnerId(String ownerId) {
-		return ethereumAccountRepository.findByOwnerId(ownerId);
+	public List<EthereumAccount> getAccountsByOwnerIdActiveEscrow(String ownerId,boolean inactive, boolean escrow) {
+		if (inactive && escrow) {
+			return ethereumAccountRepository.findByOwnerId(ownerId);
+		} else if (escrow) {
+			return ethereumAccountRepository.findByOwnerIdAndActivated(ownerId,true);
+		} else if (inactive) {
+			return ethereumAccountRepository.findByOwnerIdAndAuthorisationTypeNot(ownerId,AuthorisationType.ESCROW);
+		} else {
+			return ethereumAccountRepository.findByOwnerIdAndActivatedAndAuthorisationTypeNot(ownerId,true,AuthorisationType.ESCROW);
+		}
+		
 	}
 
 	public List<EthereumAccount> getAccountsByAccountAddress(String accountAddress) {

@@ -237,9 +237,13 @@ public class AccountMapperController {
 
 	@ApiOperation(value = "View existing accounts")
 	@RequestMapping(method = GET, value = "/accounts")
-	public ResponseEntity<AccountsResponse> listAccounts(@RequestParam(name = "ownerId", required = false) String ownerId) {
+	public ResponseEntity<AccountsResponse> listAccounts(
+			@RequestParam(name = "ownerId", required = false) String ownerId,
+			@RequestParam(name = "escrow", required = false) boolean escrow,
+			@RequestParam(name = "inactive", required = false) boolean inactive
+	) {
 		if (ownerId != null) {
-			return new ResponseEntity<AccountsResponse>(AccountsResponse.fromEthereumAccounts(accountManagementService.getAccountsByOwnerId(ownerId)), HttpStatus.OK);
+			return new ResponseEntity<AccountsResponse>(AccountsResponse.fromEthereumAccounts(accountManagementService.getAccountsByOwnerIdActiveEscrow(ownerId,inactive,escrow)), HttpStatus.OK);
 		}
 		return new ResponseEntity<AccountsResponse>(AccountsResponse.fromEthereumAccounts(accountManagementService.getAllAccounts()), HttpStatus.OK);
 	}
@@ -251,6 +255,39 @@ public class AccountMapperController {
 		return new ResponseEntity<AccountsResponse>(AccountsResponse.fromEthereumAccounts(accountManagementService.getAllAccounts()), HttpStatus.OK);
 	}
 
+
+	//TODO: REMOVE THIS, ONLY HERE FOR TESTING ESCROW
+
+	@ApiOperation(value = "TEST-TEST-TEST authorises any id code as ID CARD")
+	@RequestMapping(
+			method = GET,
+			value = "/authorisations/testActivate/{ownerId}/{address}")
+	public ResponseEntity<AccountActivationResponse> testActivate(@PathVariable(value="ownerId") String ownerId, @PathVariable(value="address") String address) throws  IOException, InterruptedException {
+
+		//ethereumService.testSigning();
+		EthereumAccount account = accountManagementService.storeNewAccount(address, ownerId, AuthorisationType.ID_CARD);
+		String txHash = ethereumService.activateEthereumAccount(account.getAddress());
+
+		accountManagementService.markActivated(account,txHash);
+		//accountManagementService.markActivated(account,null);
+		AccountActivationResponse response = AccountActivationResponse.builder()
+				.authenticationStatus(AuthenticationStatus.LOGIN_SUCCESS.name())
+				.ownerId(ownerId)
+				.transactionHash(txHash)
+				.build();
+			
+		// check if escrow
+		long idCode = Long.parseLong(account.getOwnerId());
+		List<EscrowTransfer> etxs;
+		if ( account.getAuthorisationType() != AuthorisationType.ESCROW && escrowService.getExistingEscrow(idCode) != null ) {
+			//TODO: blocking the thread, terrible idea to make sure nonce gets updated
+			Thread.sleep(1000);
+			etxs = escrowService.clearAllToAddress(idCode, account.getAddress());
+			response.setEscrowTransfers(etxs);
+		}
+
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
 
 
 
