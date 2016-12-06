@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.ethereum.crypto.ECKey;
 import java.io.IOException;
+import org.json.JSONException;
 
 import com.kryptoeuro.accountmapper.domain.Escrow;
 import com.kryptoeuro.accountmapper.domain.EthereumAccount;
@@ -13,6 +14,7 @@ import com.kryptoeuro.accountmapper.response.AccountActivationResponse;
 import com.kryptoeuro.accountmapper.EscrowRepository;
 import com.kryptoeuro.accountmapper.security.EncryptionUtils;
 import com.kryptoeuro.accountmapper.response.WalletServerAccountResponse;
+import com.kryptoeuro.accountmapper.response.WalletServerHistoryResponse;
 import com.kryptoeuro.accountmapper.response.EscrowTransfer;
 
 import java.util.List;
@@ -58,7 +60,7 @@ public class EscrowService {
 		escrowRepository.save(escrow);
 		return ethAccount;
 	}
-	public  List<EscrowTransfer> clearAllToAddress(long idCode, String address) throws IOException {
+	public  List<EscrowTransfer> clearAllToAddress(long idCode, String address) throws IOException,JSONException {
 		Escrow escrow;
 		List<EscrowTransfer> etxs = new ArrayList<EscrowTransfer>();
 
@@ -68,11 +70,11 @@ public class EscrowService {
 		int nonceIncrement = 1;
 
 		while ( (escrow = getExistingEscrow(idCode)) != null) {
-			EscrowTransfer transfer = clearToAddress(escrow, address,nonceIncrement);
-			if (transfer != null) {
-				nonceIncrement++;
-				etxs.add(transfer);
-				escrow.setClearingHash(transfer.getTransactionHash());
+			List<EscrowTransfer> transfers = clearToAddress(escrow, address,nonceIncrement);
+			if (transfers != null) {
+				etxs.addAll(transfers);
+				//should change for multiple escrow tx per addr
+				escrow.setClearingHash(transfers.get(0).getTransactionHash());
 			}
 			escrow.setCleared(true);
 			escrowRepository.save(escrow);
@@ -80,20 +82,28 @@ public class EscrowService {
 		}
 		return etxs;
 	}
-	public EscrowTransfer clearToAddress(Escrow escrow, String address, int nonceIncrement) throws IOException {
+	public List<EscrowTransfer> clearToAddress(Escrow escrow, String address, int nonceIncrement) throws IOException,JSONException {
 
 		WalletServerAccountResponse addrDetails = wsService.getAccount(escrow.getAddress()); 
+		List<WalletServerHistoryResponse> history = wsService.getHistory(escrow.getAddress()); 
 		long bal = addrDetails.getBalance();
 		if (bal > 0) {
-			log.info("Move "+String.valueOf(addrDetails.getBalance())+" to "+ address + " sign with " + encUtils.decrypt(escrow.getPrivateKey()));
+			log.info("Move total of: "+String.valueOf(addrDetails.getBalance())+" to "+ address + " sign with " + encUtils.decrypt(escrow.getPrivateKey()));
+			List<EscrowTransfer> escrowTransfers = new ArrayList();
+			for (WalletServerHistoryResponse tx : history) {
 
-			String txHash = ethereumService.sendBalance(address,encUtils.decrypt(escrow.getPrivateKey()), nonceIncrement);
-			EscrowTransfer escrowTransfer = EscrowTransfer.builder()
-				.amount(bal)
-				.transactionHash(txHash)
-				.timestamp(new Date().getTime())
-				.build();
-			return escrowTransfer;
+				String txHash = ethereumService.sendBalance(address,encUtils.decrypt(escrow.getPrivateKey()), nonceIncrement, tx.getAmount());
+				nonceIncrement++;
+				wsService.copyReference(tx.getId(),txHash);
+
+				escrowTransfers.add( EscrowTransfer.builder()
+					.amount(tx.getAmount())
+					.transactionHash(txHash)
+					.timestamp(new Date().getTime())
+					.build()
+				);
+			}
+			return escrowTransfers;
 		} else {
 			return null;
 		}

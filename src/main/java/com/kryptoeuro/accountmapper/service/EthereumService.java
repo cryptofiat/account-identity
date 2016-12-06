@@ -214,20 +214,28 @@ public class EthereumService {
 		return byteSig;
 	}
 
-
 	public String sendBalance(String toAddress, String privKey, int nonceIncrement) throws IOException {
+
+		
+		ECKey signer = ECKey.fromPrivate(Hex.decode(without0x(privKey)));
+		WalletServerAccountResponse addrDetails = wsService.getAccount(hex(signer.getAddress())); 
+		return sendBalance(toAddress,privKey,nonceIncrement,addrDetails.getBalance());
+	}
+
+	public String sendBalance(String toAddress, String privKey, int nonceIncrement, long amount) throws IOException {
 
 		
 		ECKey signer = ECKey.fromPrivate(Hex.decode(without0x(privKey)));
 		ECKey sponsorKey = getAccountApproverKey(); 
 		
 		WalletServerAccountResponse addrDetails = wsService.getAccount(hex(signer.getAddress())); 
-		byte[] signatureArg = signDelegate(0, addrDetails.getBalance(), addrDetails.getNonce()+1, without0x(toAddress), signer); 
+
+		byte[] signatureArg = signDelegate(0, amount, addrDetails.getNonce()+1, without0x(toAddress), signer); 
 
 		byte[] callData = transferFunction.encode(
 			addrDetails.getNonce()+1, 
 			toAddress, 
-			addrDetails.getBalance(), 
+			amount, 
 			0, 
 			signatureArg, 
 			hex(sponsorKey.getAddress()));
