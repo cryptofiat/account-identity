@@ -46,7 +46,7 @@ public class LdapService {
 		LdapNetworkConnection connection = new LdapNetworkConnection("ldap.sk.ee");
 		try {
 			connection.bind();
-			EntryCursor cursor = connection.search("ou=Authentication,o=ESTEID,c=EE", "(serialNumber="+String.valueOf(idCode)+")", SearchScope.SUBTREE, "*");
+			EntryCursor cursor = connection.search("c=EE", "(serialNumber="+String.valueOf(idCode)+")", SearchScope.SUBTREE, "*");
 
 			while (cursor.next()) {
 				Entry entry = cursor.get();
