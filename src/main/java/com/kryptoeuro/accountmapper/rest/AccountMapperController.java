@@ -272,32 +272,6 @@ public class AccountMapperController {
 	}
 
 
-	//TODO: REMOVE THIS, ONLY HERE FOR TESTING ESCROW
-
-	@ApiOperation(value = "TEST-TEST-TEST authorises any id code as ID CARD")
-	@RequestMapping(
-			method = GET,
-			value = "/authorisations/testActivate/{ownerId}/{address}")
-	public ResponseEntity<AccountActivationResponse> testActivate(@PathVariable(value="ownerId") String ownerId, @PathVariable(value="address") String address) throws  IOException {
-
-		walletService.getHistory("0x833898875a12a3d61ef18dc3d2b475c7ca3a4a72");
-		//ethereumService.testSigning();
-		/*
-		EthereumAccount account = accountManagementService.storeNewAccount(address, ownerId, AuthorisationType.ID_CARD);
-		String txHash = ethereumService.activateEthereumAccount(account.getAddress());
-
-		accountManagementService.markActivated(account,txHash);
-		//accountManagementService.markActivated(account,null);
-		AccountActivationResponse response = AccountActivationResponse.builder()
-				.authenticationStatus(AuthenticationStatus.LOGIN_SUCCESS.name())
-				.ownerId(ownerId)
-				.transactionHash(txHash)
-				.build();
-
-	  	response.setEscrowTransfers(clearEscrow(account));
-		*/
-		return new ResponseEntity<>(null, HttpStatus.OK);
-	}
 
 
 

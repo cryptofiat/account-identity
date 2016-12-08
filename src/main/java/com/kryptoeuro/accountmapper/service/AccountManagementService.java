@@ -100,4 +100,14 @@ public class AccountManagementService {
 	public void removeAccountById(Long id) {
 		ethereumAccountRepository.delete(id);
 	}
+
+
+	public void deactivateAddress(String address) {
+		//eg when clearing escrow
+		List<EthereumAccount> accounts = getAccountsByAccountAddress(ethService.without0x(address));
+		accounts.forEach((acc) -> {
+			acc.setActivated(false);
+			ethereumAccountRepository.save(acc);
+		});
+	}
 }

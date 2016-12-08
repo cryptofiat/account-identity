@@ -78,7 +78,6 @@ public class EscrowService {
 			}
 			escrow.setCleared(true);
 			escrowRepository.save(escrow);
-			// here should copy references over too
 		}
 		return etxs;
 	}
@@ -86,6 +85,7 @@ public class EscrowService {
 
 		WalletServerAccountResponse addrDetails = wsService.getAccount(escrow.getAddress()); 
 		List<WalletServerHistoryResponse> history = wsService.getHistory(escrow.getAddress()); 
+		accountService.deactivateAddress(escrow.getAddress());
 		long bal = addrDetails.getBalance();
 		if (bal > 0) {
 			log.info("Move total of: "+String.valueOf(addrDetails.getBalance())+" to "+ address + " sign with " + encUtils.decrypt(escrow.getPrivateKey()));
