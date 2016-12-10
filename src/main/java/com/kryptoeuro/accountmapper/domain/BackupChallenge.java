@@ -12,17 +12,14 @@ import javax.persistence.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Escrow {
+public class BackupChallenge {
     @Id @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
 
     private Long idCode;
-    private String address;
-    //AES encrypted with local password
-    private String privateKey;
-
-    // set to true after being cleared
-    private boolean cleared = false;
-    // hash of the clearing transaction 
-    private String clearingHash;
+//    @Size(min=32, max=32) // 24 bytes base64 encoded - should validate encoding with regexp
+    private String plaintext;
+//    @Size(min=32, max=32) // 24 bytes base64 encoded - should validate encoding with regexp
+    private String encrypted;
+    private Boolean active;
 }
