@@ -21,3 +21,7 @@ flyway:
     continue-on-error: false
     test-on-borrow: true
     validation-query: SELECT 1
+
+escrow:
+  encryption:
+    password: Change-This-On-Production

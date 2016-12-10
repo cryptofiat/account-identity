@@ -8,6 +8,7 @@ import com.kryptoeuro.accountmapper.command.PollCommand;
 import com.kryptoeuro.accountmapper.domain.AuthorisationType;
 import com.kryptoeuro.accountmapper.domain.EthereumAccount;
 import com.kryptoeuro.accountmapper.domain.PendingAuthorisation;
+import com.kryptoeuro.accountmapper.response.EscrowTransfer;
 import com.kryptoeuro.accountmapper.response.AccountsResponse;
 import com.kryptoeuro.accountmapper.response.AuthenticateResponse;
 import com.kryptoeuro.accountmapper.response.AccountActivationResponse;
@@ -27,9 +28,11 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.io.IOException;
+import org.json.JSONException;
 import java.security.Principal;
 import java.util.Base64;
 import java.util.List;
+import java.util.ArrayList;
 
 import static org.springframework.web.bind.annotation.RequestMethod.*;
 
@@ -43,9 +46,13 @@ public class AccountMapperController {
 	@Autowired
 	EthereumService ethereumService;
 	@Autowired
+	EscrowService escrowService;
+	@Autowired
 	AccountManagementService accountManagementService;
 	@Autowired
 	PendingAuthorisationService pendingAuthorisationService;
+	@Autowired
+	WalletServerService walletService;
 
 	private static boolean accountActivationEnabled = true;
 
@@ -81,14 +88,14 @@ public class AccountMapperController {
 			method = POST,
 			value = "/authorisations/idCards",
 			consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public ResponseEntity<AccountActivationResponse> authenticateIdCard(@Valid @RequestBody AuthenticateCommand authenticateCommand, Principal principal) {
+	public ResponseEntity<AccountActivationResponse> authenticateIdCard(@Valid @RequestBody AuthenticateCommand authenticateCommand, Principal principal) throws JSONException, IOException {
 		String ownerId = principal.getName();
 		HttpStatus status = HttpStatus.OK;
 		String txHash = new String();
-
+		EthereumAccount account = new EthereumAccount();
 		List<EthereumAccount> existingAccounts = accountManagementService.getAccountsByAccountAddress(Hex.toHexString(authenticateCommand.getAccountAddress()));
 		if(existingAccounts.size() == 0) {
-			EthereumAccount account = accountManagementService.storeNewAccount(Hex.toHexString(authenticateCommand.getAccountAddress()), ownerId, AuthorisationType.ID_CARD);
+			account = accountManagementService.storeNewAccount(Hex.toHexString(authenticateCommand.getAccountAddress()), ownerId, AuthorisationType.ID_CARD);
 			if(accountActivationEnabled) {
 				try {
 					txHash = ethereumService.activateEthereumAccount(account.getAddress());
@@ -107,6 +114,7 @@ public class AccountMapperController {
 						.authenticationStatus(AuthenticationStatus.LOGIN_SUCCESS.name())
 						.ownerId(ownerId)
 						.transactionHash(txHash)
+	  					.escrowTransfers(clearEscrow(account))
 						.build(), status);
 	}
 
@@ -133,7 +141,7 @@ public class AccountMapperController {
 			method = POST,
 			value = "/accounts",
 			consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public ResponseEntity<AccountActivationResponse> authorizeMobileIdAndCreateAccountIdentityMapping(@Valid @RequestBody PollCommand pollCommand) {
+	public ResponseEntity<AccountActivationResponse> authorizeMobileIdAndCreateAccountIdentityMapping(@Valid @RequestBody PollCommand pollCommand) throws IOException, JSONException {
 		PendingAuthorisation pendingAuthorisation = pendingAuthorisationService.findByAuthIdentifier(pollCommand.getAuthIdentifier());
 
 		AccountActivationResponse.AccountActivationResponseBuilder responseBuilder = AccountActivationResponse.getBuilderForAuthType(AuthorisationType.MOBILE_ID);
@@ -183,6 +191,7 @@ public class AccountMapperController {
 		return new ResponseEntity<AccountActivationResponse>(responseBuilder
 				.authenticationStatus(AuthenticationStatus.LOGIN_SUCCESS.name())
 				.transactionHash(txHash)
+	  			.escrowTransfers(clearEscrow(newAccount))
 				.build(), 
 			HttpStatus.OK);
 	}
@@ -233,9 +242,13 @@ public class AccountMapperController {
 
 	@ApiOperation(value = "View existing accounts")
 	@RequestMapping(method = GET, value = "/accounts")
-	public ResponseEntity<AccountsResponse> listAccounts(@RequestParam(name = "ownerId", required = false) String ownerId) {
+	public ResponseEntity<AccountsResponse> listAccounts(
+			@RequestParam(name = "ownerId", required = false) String ownerId,
+			@RequestParam(name = "escrow", required = false) boolean escrow,
+			@RequestParam(name = "inactive", required = false) boolean inactive
+	) {
 		if (ownerId != null) {
-			return new ResponseEntity<AccountsResponse>(AccountsResponse.fromEthereumAccounts(accountManagementService.getAccountsByOwnerId(ownerId)), HttpStatus.OK);
+			return new ResponseEntity<AccountsResponse>(AccountsResponse.fromEthereumAccounts(accountManagementService.getAccountsByOwnerIdActiveEscrow(ownerId,inactive,escrow)), HttpStatus.OK);
 		}
 		return new ResponseEntity<AccountsResponse>(AccountsResponse.fromEthereumAccounts(accountManagementService.getAllAccounts()), HttpStatus.OK);
 	}
@@ -246,6 +259,20 @@ public class AccountMapperController {
 		accountManagementService.removeAccountById(mappingId);
 		return new ResponseEntity<AccountsResponse>(AccountsResponse.fromEthereumAccounts(accountManagementService.getAllAccounts()), HttpStatus.OK);
 	}
+
+	private List<EscrowTransfer> clearEscrow(EthereumAccount account) throws IOException,JSONException {
+			
+	  	long idCode = Long.parseLong(account.getOwnerId());
+		String address  = account.getAddress();
+		// check if escrow
+		List<EscrowTransfer> etxs;
+		if ( account.getAuthorisationType() != AuthorisationType.ESCROW && escrowService.getExistingEscrow(idCode) != null ) {
+			return escrowService.clearAllToAddress(idCode,address);
+		} else return null;
+	}
+
+
+
 
 
 }
