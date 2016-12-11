@@ -55,7 +55,7 @@ public class BackupService {
 		challengeRepository.save(challenge);
 	}
 	public boolean challengeExists(String challenge, boolean active) {
-		return !challengeRepository.findByEncryptedAndActive(challenge,active).isEmpty();
+		return !challengeRepository.findByPlaintextAndActive(challenge,active).isEmpty();
         }
 
 	public List<KeyBackup> getKeys(String challenge, boolean active) {

@@ -51,7 +51,7 @@ public class BackupController {
 		if (challenge == null) { throw new BackupNotFoundException(); };
 
 		return new ResponseEntity<BackupChallengeResponse>(BackupChallengeResponse.builder()
-							.plaintext(challenge.getPlaintext())
+							.encrypted(challenge.getEncrypted())
 							.build(), HttpStatus.OK);
 	}
 

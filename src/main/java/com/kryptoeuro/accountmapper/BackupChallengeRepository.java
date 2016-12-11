@@ -9,7 +9,7 @@ public interface BackupChallengeRepository extends CrudRepository<BackupChalleng
 
     List<BackupChallenge> findByIdCode(Long idCode);
     List<BackupChallenge> findByIdCodeAndActive(Long idCode, boolean active);
-    List<BackupChallenge> findByEncryptedAndActive(String encrypted, boolean active);
+    List<BackupChallenge> findByPlaintextAndActive(String plaintext, boolean active);
     List<BackupChallenge> findByPlaintextAndEncryptedAndActive(String plaintext, String encrypted, boolean active);
 
     void delete(Long id);
