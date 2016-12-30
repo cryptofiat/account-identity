@@ -1,8 +1,8 @@
 spring:
   datasource:
     url: jdbc:mysql://localhost:3306/account_identity?characterEncoding=UTF-8&useLegacyDatetimeCode=false&serverTimezone=UTC
-    username: root
-    password: Kalamaja123
+    username: acc-id-service
+    password: q1w2e3r4
     initialize: true
     driver-class-name: com.mysql.jdbc.Driver
     continue-on-error: false
@@ -10,8 +10,8 @@ spring:
     validation-query: SELECT 1
 
 flyway:
-  user: root
-  password: Kalamaja123
+  user: flyway
+  password: q1w2e3r4
   datasource:
     url: ${spring.datasource.url}
     username: ${flyway.user}
