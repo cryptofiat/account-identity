@@ -20,6 +20,7 @@ import com.kryptoeuro.accountmapper.error.SearchTooBroadException;
 import com.kryptoeuro.accountmapper.LdapResponseRepository;
 import org.springframework.data.domain.PageRequest;
 import java.util.List;
+import java.util.Arrays;
 
 @RestController
 @RequestMapping("/v1/ldap")
@@ -34,6 +35,7 @@ public class LdapController {
 
 	private static int MIN_SEARCH_QUERY_LENGTH = 3;
 	private static int MAX_RESULT_SIZE = 10;
+	private static int EST_ID_LENGTH = 11;
 
 	@RequestMapping(method = RequestMethod.GET, value = "/{idCode}")
 	public ResponseEntity<LdapResponse> checkIdCode(@PathVariable("idCode") long idCode) {
@@ -52,7 +54,14 @@ public class LdapController {
 			throw new SearchTooBroadException();
 		}
 
+
 		List<LdapResponse> lr = ldapResponseRepository.searchLdapResponse(searchString, new PageRequest(0,MAX_RESULT_SIZE));
+
+		// if 11 digit number -  then check on LDAP
+		if (lr.size() < 1 && searchString.length() == EST_ID_LENGTH && searchString.matches("[0-9]+")) {
+			lr = Arrays.asList( ldapService.lookupIdCode(Long.parseLong(searchString)) );
+		}
+
 		return new ResponseEntity<List<LdapResponse>>(lr, HttpStatus.OK);
 	}
 }
