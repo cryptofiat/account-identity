@@ -89,6 +89,7 @@ public class AccountMapperController {
 			value = "/authorisations/idCards",
 			consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<AccountActivationResponse> authenticateIdCard(@Valid @RequestBody AuthenticateCommand authenticateCommand, Principal principal) throws JSONException, IOException {
+		//if (!principal) throw SOME CUSTOM EXCEPTION OF CARD NOT PRESENT
 		String ownerId = principal.getName();
 		HttpStatus status = HttpStatus.OK;
 		String txHash = new String();

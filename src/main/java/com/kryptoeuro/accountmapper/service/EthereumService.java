@@ -230,10 +230,10 @@ public class EthereumService {
 		
 		WalletServerAccountResponse addrDetails = wsService.getAccount(hex(signer.getAddress())); 
 
-		byte[] signatureArg = signDelegate(0, amount, addrDetails.getNonce()+1, without0x(toAddress), signer); 
+		byte[] signatureArg = signDelegate(0, amount, addrDetails.getNonce()+1 + nonceIncrement, without0x(toAddress), signer); 
 
 		byte[] callData = transferFunction.encode(
-			addrDetails.getNonce()+1, 
+			addrDetails.getNonce()+1 + nonceIncrement, 
 			toAddress, 
 			amount, 
 			0, 
