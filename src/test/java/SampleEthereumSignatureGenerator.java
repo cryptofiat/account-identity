@@ -1,4 +1,4 @@
-import static com.kryptoeuro.accountmapper.TestUtils.convertEthereumSignatureToDer;
+import static eu.cryptoeuro.accountmapper.TestUtils.convertEthereumSignatureToDer;
 import static org.ethereum.crypto.ECKey.CURVE;
 import static org.ethereum.crypto.HashUtil.sha3;
 import static org.ethereum.util.ByteUtil.bytesToBigInteger;
