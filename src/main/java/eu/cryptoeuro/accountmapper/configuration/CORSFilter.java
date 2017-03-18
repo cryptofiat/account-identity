@@ -28,8 +28,18 @@ public class CORSFilter extends GenericFilterBean {
         response.setHeader("Access-Control-Allow-Origin", "*");
         response.setHeader("Access-Control-Allow-Methods", "POST, PUT, GET, OPTIONS, DELETE");
 //        response.setHeader("Access-Control-Max-Age", "3600");
-//        response.setHeader("Access-Control-Allow-Headers", "Authorization");
+        response.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
 //        response.setHeader("Access-Control-Allow-Credentials", "true");
+
+        List<String> allowedHeaders = Arrays.asList(
+                "x-requested-with",
+                HttpHeaders.CONTENT_TYPE,
+                HttpHeaders.AUTHORIZATION,
+                HttpHeaders.USER_AGENT,
+                HttpHeaders.ORIGIN,
+                HttpHeaders.ACCEPT
+                );
+        response.setHeader("Access-Control-Allow-Headers",  String.join(", ", allowedHeaders));
 
         HttpServletRequest request = ((HttpServletRequest) req);
 
