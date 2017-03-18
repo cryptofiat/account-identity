@@ -1,4 +1,4 @@
-import com.kryptoeuro.accountmapper.service.EthereumService;
+import eu.cryptoeuro.accountmapper.service.EthereumService;
 
 import java.io.IOException;
 
