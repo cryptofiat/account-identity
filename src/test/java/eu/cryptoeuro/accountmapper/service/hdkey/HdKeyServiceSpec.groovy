@@ -6,6 +6,10 @@ class HdKeyServiceSpec extends Specification {
 
     HdKeyService service = new HdKeyService();
 
+    def setup() {
+        service.initialize()
+    }
+
     def "generate child"() {
 
         given:
