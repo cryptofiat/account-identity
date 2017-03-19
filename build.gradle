@@ -50,6 +50,10 @@ dependencies {
 	compile("io.springfox:springfox-swagger-ui:2.0.2")
 
 	compile("org.apache.directory.api:api-all:1.0.0-RC2")
+
+	compile("org.bitcoinj:bitcoinj-core:0.14.4")
+	testCompile("org.spockframework:spock-spring:1.0-groovy-2.4")
+
 }
 
 
