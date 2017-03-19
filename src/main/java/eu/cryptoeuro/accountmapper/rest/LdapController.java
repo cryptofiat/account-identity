@@ -3,6 +3,7 @@ package eu.cryptoeuro.accountmapper.rest;
 import eu.cryptoeuro.accountmapper.error.SearchTooBroadException;
 import eu.cryptoeuro.accountmapper.service.LdapService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -40,7 +41,9 @@ public class LdapController {
 		LdapResponse lr = ldapService.lookupIdCode(idCode);
 		// should check if didn't return, then respond with 404
 		if (lr != null && lr.getIdCode() > 0) {
-			return new ResponseEntity<LdapResponse>(lr, HttpStatus.OK);
+			HttpHeaders headers = new HttpHeaders();
+			headers.setCacheControl("max-age=3600");
+			return new ResponseEntity<LdapResponse>(lr, headers, HttpStatus.OK);
 		} else {
 			throw new LdapNotFoundException();
 		}
