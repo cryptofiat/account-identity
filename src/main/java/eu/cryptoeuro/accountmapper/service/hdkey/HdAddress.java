@@ -8,6 +8,6 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class HdAddress {
-    private Long index;
+    private int index;
     private String address;
 }
