@@ -50,7 +50,7 @@ public class EthereumService {
 //	private String contractAddress = "0x76f86A0a55FB69970af5cB691c41F8bb8b722F52"; // 3.10.2016 11:45AM
 	private String contractAddress = "0xA5f9b79Fc7f067Df25A795685493514A295A8A81"; // 3.10.2016 15:14PM
 	private String contractAddressForTransfers = "0xaf71e622792f47119411ce019f4ca1b8d993496e"; // 3.10.2016 15:14PM
-	private String jsonRpcUrl = "http://46.4.80.11:8545"; // Parity node on AWS
+	private String jsonRpcUrl = "http://big-parity.euro2.ee:8545"; // Parity node on AWS
 
 	private Function approveAccountFunction = Function.fromSignature("approveAccount", "address");
 	private Function appointAccountApproverFunction = Function.fromSignature("appointAccountApprover", "address");
