@@ -16,6 +16,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
+
 
 @Slf4j
 @Component
@@ -25,6 +28,15 @@ public class CORSFilter extends GenericFilterBean {
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
         HttpServletResponse response = (HttpServletResponse) res;
+	HttpServletRequest httprequest = (HttpServletRequest) req;
+
+	String[] allowDomain = {"http://localhost:8100","http://wallet.euro2.ee"};
+	Set<String> allowedOrigins = new HashSet<String>(Arrays.asList (allowDomain));
+	String originHeader = httprequest.getHeader("Origin");
+	String allowedResponse = (allowedOrigins.contains(originHeader)) ? originHeader : "*";
+
+	response.setHeader("Access-Control-Allow-Origin", allowedResponse);
+
         response.setHeader("Access-Control-Allow-Origin", "http://wallet.euro2.ee");
         response.setHeader("Access-Control-Allow-Methods", "POST, PUT, GET, OPTIONS, DELETE");
         response.setHeader("Access-Control-Max-Age", "3600");
