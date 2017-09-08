@@ -33,6 +33,7 @@ import java.security.Principal;
 import java.util.Base64;
 import java.util.List;
 
+import static java.util.Collections.emptyList;
 import static org.springframework.web.bind.annotation.RequestMethod.*;
 
 @RestController
@@ -248,9 +249,9 @@ public class AccountMapperController {
 			@RequestParam(name = "inactive", required = false) boolean inactive
 	) {
 		if (ownerId != null) {
-			return new ResponseEntity<AccountsResponse>(AccountsResponse.fromEthereumAccounts(accountManagementService.getAccountsByOwnerIdActiveEscrow(ownerId,inactive,escrow)), HttpStatus.OK);
+			return new ResponseEntity<>(AccountsResponse.fromEthereumAccounts(accountManagementService.getAccountsByOwnerIdActiveEscrow(ownerId,inactive,escrow)), HttpStatus.OK);
 		}
-		return new ResponseEntity<AccountsResponse>(AccountsResponse.fromEthereumAccounts(accountManagementService.getAllAccounts()), HttpStatus.OK);
+		return new ResponseEntity<>(AccountsResponse.fromEthereumAccounts(emptyList()), HttpStatus.BAD_REQUEST);
 	}
 
 	@ApiOperation(value = "Remove account identity mapping")
