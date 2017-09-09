@@ -25,3 +25,14 @@ flyway:
 escrow:
   encryption:
     password: Change-This-On-Production
+
+wallet.server.url: http://wallet.euro2.ee:8080
+ref.server.url: http://wallet.euro2.ee:8000/
+
+---
+
+spring:
+    profiles: development
+server:
+    port: 9080
+wallet.server.url: http://localhost:8080
