@@ -5,6 +5,6 @@ git pull
 echo "======== STEP 3/5 BUILDING APPLICATION ==========================="
 ./gradlew build
 echo "======== STEP 4/5 STARTING APPLICATION ==========================="
-nohup java -jar build/libs/accountmapper-0.0.1-SNAPSHOT.jar >> /opt/logs/accountmapper.log &
+nohup java -javaagent:/home/ubuntu/newrelic/newrelic.jar -jar build/libs/accountmapper-0.0.1-SNAPSHOT.jar >> /opt/logs/accountmapper.log &
 echo "======== STEP 5/5 READY! TAILING LOG (You can Ctrl+C now) ========"
 tail -f /opt/logs/accountmapper.log
