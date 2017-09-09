@@ -50,5 +50,5 @@ jobs:
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
               scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -r  build/libs/* ubuntu@id.euro2.ee:~/account-identity-mapper
-              ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ubuntu@id.euro2.ee:/bin/systemctl restart account-identity-mapper
+              ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ubuntu@id.euro2.ee sudo systemctl restart account-identity-mapper
             fi
