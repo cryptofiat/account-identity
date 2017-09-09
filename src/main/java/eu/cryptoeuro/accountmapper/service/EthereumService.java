@@ -37,6 +37,8 @@ import static java.util.stream.Collectors.joining;
 @Transactional(rollbackFor = Exception.class)
 public class EthereumService {
 
+	public static final int GAS_LIMIT = 200000;
+
 	@Autowired
 	WalletServerService wsService;
 
@@ -78,13 +80,12 @@ public class EthereumService {
 	private String sendTransaction(ECKey signer, byte[] callData, String _contract, int  nonceIncrement) throws IOException {
 		//TODO: maybe a queue of pending transactions, otherwise one goes  through at a time
 		long transactionCount = getTransactionCount(hex(signer.getAddress())) + nonceIncrement;
-		long gasPriceLong = getGasPrice();
-		log.info("Current gas price: " + String.valueOf(gasPriceLong));
+		long gasPriceWei = wsService.getGasPriceWei();
+		log.info("Current gas price: " + String.valueOf(gasPriceWei));
 		byte[] nonce = ByteUtil.longToBytesNoLeadZeroes(transactionCount);
 
-		//byte[] gasPrice = ByteUtil.longToBytesNoLeadZeroes(30000000000L);
-		byte[] gasPrice = ByteUtil.longToBytesNoLeadZeroes(Math.round(gasPriceLong * 1.2));
-		byte[] gasLimit = ByteUtil.longToBytesNoLeadZeroes(200000);
+		byte[] gasPrice = ByteUtil.longToBytesNoLeadZeroes(gasPriceWei);
+		byte[] gasLimit = ByteUtil.longToBytesNoLeadZeroes(GAS_LIMIT);
 
 		byte[] toAddress = Hex.decode(without0x(_contract));
 
@@ -123,7 +124,7 @@ public class EthereumService {
 		return Long.parseLong(without0x(result), 16);
 	}
 
-	private long getGasPrice() throws IOException {
+	public Long getGasPriceWeiFromNetwork() throws IOException {
 		String result = send(json("eth_gasPrice"));
 		return Long.parseLong(without0x(result), 16);
 	}

@@ -14,8 +14,10 @@ import java.util.Arrays;
 import org.json.JSONObject;
 import org.json.JSONException;
 import org.apache.commons.io.IOUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import eu.cryptoeuro.accountmapper.response.WalletServerGasPriceResponse;
 import eu.cryptoeuro.accountmapper.response.WalletServerAccountResponse;
 import eu.cryptoeuro.accountmapper.response.WalletServerHistoryResponse;
 
@@ -26,8 +28,11 @@ public class WalletServerService {
 	@Autowired
 	EthereumService ethService;
 
-	private String walletServer = "http://wallet.euro2.ee:8080"; // wallet-server node on AWS
-	private String refServer = "http://wallet.euro2.ee:8000/"; // wallet-server node on AWS
+	@Value("${wallet.server.url}")
+	private String walletServer;
+
+	@Value("${ref.server.url}")
+	private String refServer;
 
 	public WalletServerAccountResponse getAccount(String address) {
 
@@ -81,5 +86,17 @@ public class WalletServerService {
 			log.warn("IO excpetion in reading reference, probably doesn't exist for tx: "+fromTransactionHash);
 		}
 		
+	}
+
+	public Long getGasPriceWei() throws IOException {
+		ObjectMapper mapper = new ObjectMapper();
+		WalletServerGasPriceResponse response;
+		try {
+			response = mapper.readValue(new URL(walletServer+"/v1/fees/gasPrice"), WalletServerGasPriceResponse.class);
+		} catch (Exception e) {
+			log.error("Failed loading gas price from wallet-server", e);
+			return ethService.getGasPriceWeiFromNetwork();
+		}
+		return response.getGasPriceWei();
 	}
 }
