@@ -206,12 +206,8 @@ public class AccountMapperController {
 																										  @RequestHeader(value = "Authorization") String authorization) {
 		AccountActivationResponse.AccountActivationResponseBuilder responseBuilder = AccountActivationResponse.getBuilderForAuthType(AuthorisationType.BANK_TRANSFER).ownerId(cmd.getOwnerId());
 
-		//Wow, such authorization, much secure
-		try {
-			if (authorization == null || !ethereumService.getParityAuthCredentials().equals(new String(Base64.getDecoder().decode(authorization.replace("Basic ", "")))))
-				throw new Exception("Account registration via bank unauthorized");
-		} catch (Exception e) {
-			log.error(e.getLocalizedMessage());
+		if (!isAuthorized(authorization)) {
+			log.error("Account registration via bank unauthorized");
 			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 		}
 
@@ -256,13 +252,30 @@ public class AccountMapperController {
 
 	@ApiOperation(value = "Remove account identity mapping")
 	@RequestMapping(method = DELETE, value = "/accounts")
-	public ResponseEntity<AccountsResponse> removeAccount(@RequestParam(name = "mappingId", required = true) Long mappingId) {
+	public ResponseEntity<AccountsResponse> removeAccount(
+			@RequestParam(name = "mappingId", required = true) Long mappingId,
+			@RequestHeader(value = "Authorization") String authorization) {
+
+		if (!isAuthorized(authorization)) {
+			log.error("Account deletion unauthorized");
+			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+		}
+
 		accountManagementService.removeAccountById(mappingId);
-		return new ResponseEntity<AccountsResponse>(AccountsResponse.fromEthereumAccounts(accountManagementService.getAllAccounts()), HttpStatus.OK);
+		return new ResponseEntity<>(AccountsResponse.fromEthereumAccounts(accountManagementService.getAllAccounts()), HttpStatus.OK);
 	}
 
+    private boolean isAuthorized(String authorization) {
+        try {
+            return authorization != null && ethereumService.getParityAuthCredentials().trim().equals(new String(Base64.getDecoder().decode(authorization.replace("Basic ", ""))));
+        } catch (IOException e) {
+            log.error("Exception checking authorization", e);
+            return false;
+        }
+    }
+
 	private List<EscrowTransfer> clearEscrow(EthereumAccount account) throws IOException,JSONException {
-			
+
 	  	long idCode = Long.parseLong(account.getOwnerId());
 		String address  = account.getAddress();
 		// check if escrow
@@ -271,9 +284,4 @@ public class AccountMapperController {
 			return escrowService.clearAllToAddress(idCode,address);
 		} else return null;
 	}
-
-
-
-
-
 }
