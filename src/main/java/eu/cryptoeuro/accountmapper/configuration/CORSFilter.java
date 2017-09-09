@@ -37,7 +37,6 @@ public class CORSFilter extends GenericFilterBean {
 
 	response.setHeader("Access-Control-Allow-Origin", allowedResponse);
 
-        response.setHeader("Access-Control-Allow-Origin", "http://wallet.euro2.ee");
         response.setHeader("Access-Control-Allow-Methods", "POST, PUT, GET, OPTIONS, DELETE");
         response.setHeader("Access-Control-Max-Age", "3600");
         response.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
