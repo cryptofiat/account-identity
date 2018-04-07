@@ -8,7 +8,7 @@ jobs:
     docker:
       # specify the version you desire here
       - image: circleci/openjdk:8-jdk
-      
+
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
       # documented at https://circleci.com/docs/2.0/circleci-images/
@@ -20,7 +20,7 @@ jobs:
       # Customize the JVM maximum heap limit
       JVM_OPTS: -Xmx3200m
       TERM: dumb
-    
+
     steps:
       - checkout
 
@@ -37,18 +37,20 @@ jobs:
           paths:
             - ~/.m2
           key: v1-dependencies-{{ checksum "build.gradle" }}
-        
+
       # run tests!
       - run: gradle test
       - run: gradle build
 
       - add_ssh_keys:
           fingerprints:
-            - "bc:2a:81:49:02:b6:25:78:59:1a:fc:8a:4e:0c:1b:59"
+            - "15:4f:c6:da:d3:85:9f:dd:30:55:f2:1a:89:c5:6e:09"
 
       - deploy:
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
-              scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -r  build/libs/* ubuntu@id.euro2.ee:~/account-identity-mapper
-              ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ubuntu@id.euro2.ee sudo systemctl restart account-identity-mapper
+              ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no account-identity@id.euro2.ee /bin/mkdir /opt/account-identity/builds/"${CIRCLE_BUILD_NUM}"
+              scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -r  build/libs/* account-identity@id.euro2.ee:/opt/account-identity/builds/"${CIRCLE_BUILD_NUM}"/
+              ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no account-identity@id.euro2.ee cd /opt/account-identity; /bin/ln -sf builds/"${CIRCLE_BUILD_NUM}"/*.jar account-identity-latest.jar;
+              ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no account-identity@id.euro2.ee /bin/systemctl --user restart account-identity
             fi
