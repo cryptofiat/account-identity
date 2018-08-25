@@ -6,9 +6,6 @@ import com.codeborne.security.mobileid.MobileIDSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.oneandone.compositejks.SslContextUtils;
-import java.security.GeneralSecurityException;
-import java.io.IOException;
 
 @Service
 @Slf4j
@@ -21,9 +18,8 @@ public class MobileIdAuthService {
 	private static final String SERVICE_NAME = "Euro2Id";
 	private MobileIDAuthenticator mid = new MobileIDAuthenticator(DIGIDOC_SERVICE_URL, SERVICE_NAME);
 
-	public MobileIdAuthService() throws GeneralSecurityException, IOException{
-		//Was done like this - but then outbound SSL fails: System.setProperty("javax.net.ssl.trustStore", KEYSTORE_PATH);
-        SslContextUtils.mergeWithSystem(KEYSTORE_PATH);
+	public MobileIdAuthService() {
+		System.setProperty("javax.net.ssl.trustStore", KEYSTORE_PATH);
 	}
 
 	public MobileIDSession fullLogin(String phoneNumber) {
