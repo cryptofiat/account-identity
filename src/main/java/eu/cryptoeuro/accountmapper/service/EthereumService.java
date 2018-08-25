@@ -151,9 +151,7 @@ public class EthereumService {
 
         RestTemplate restTemplate = new RestTemplate();
 
-        //T response = restTemplate.postForObject(jsonRpcUrl, request, responseType);
         ResponseEntity<String> response = restTemplate.postForEntity(jsonRpcUrl, request, String.class);
-        log.info("Call response: " + response.toString());
 
 		if (response.getStatusCodeValue() != 200)
 			throw new IOException(response.getBody());

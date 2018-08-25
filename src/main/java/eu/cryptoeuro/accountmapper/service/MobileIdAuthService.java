@@ -14,7 +14,7 @@ public class MobileIdAuthService {
 
 	private static final String DIGIDOC_SERVICE_URL = "https://digidocservice.sk.ee";
 	private static final String TEST_DIGIDOC_SERVICE_URL = "https://tsp.demo.sk.ee/";
-	private static final String KEYSTORE_PATH = "live_keys/keystore.jks";
+	private static final String KEYSTORE_PATH = "live_keys/keystore-cacerts-aug2018-plus-digidoc-sk-ee.jks";
 	private static final String SERVICE_NAME = "Euro2Id";
 	private MobileIDAuthenticator mid = new MobileIDAuthenticator(DIGIDOC_SERVICE_URL, SERVICE_NAME);
 
