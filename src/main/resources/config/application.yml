@@ -26,6 +26,14 @@ escrow:
   encryption:
     password: Change-This-On-Production
 
+ethereum:
+  node:
+    url: http://big-parity.euro2.ee:8545
+  contract:
+    master: "0xa10a263D4336E4466502b2889D27D04582a86663"
+    approve: "0xA5f9b79Fc7f067Df25A795685493514A295A8A81"
+    delegate: "0xaf71e622792f47119411ce019f4ca1b8d993496e"
+
 wallet.server.url: http://wallet.euro2.ee:8080
 ref.server.url: http://wallet.euro2.ee:8000/
 

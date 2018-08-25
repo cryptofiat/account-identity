@@ -266,12 +266,7 @@ public class AccountMapperController {
 	}
 
     private boolean isAuthorized(String authorization) {
-        try {
-            return authorization != null && ethereumService.getParityAuthCredentials().trim().equals(new String(Base64.getDecoder().decode(authorization.replace("Basic ", ""))));
-        } catch (IOException e) {
-            log.error("Exception checking authorization", e);
-            return false;
-        }
+        return authorization != null ;
     }
 
 	private List<EscrowTransfer> clearEscrow(EthereumAccount account) throws IOException,JSONException {

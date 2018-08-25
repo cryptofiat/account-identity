@@ -18,6 +18,7 @@ import org.spongycastle.util.encoders.Hex;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -42,6 +43,15 @@ public class EthereumService {
 	@Autowired
 	WalletServerService wsService;
 
+    @Value("${ethereum.node.url}")
+    protected String jsonRpcUrl;
+
+    @Value("${ethereum.contract.approve}")
+    protected String contractAddress;
+
+    @Value("${ethereum.contract.delegate}")
+    protected String contractAddressForTransfers;
+
 
 	private HttpClient httpClient = HttpClientBuilder.create().build();
 
@@ -50,9 +60,8 @@ public class EthereumService {
 //	private String contractAddress = "0x2FdAB8f12fA9Ad9Ad91fc55d52569AFc98Be9831"; // contract 0.41
 //	private String contractAddress = "0xC91F200C33de61FF7B9B930968d0B59C1b86DAf9"; // 2.10.2016 9:56PM
 //	private String contractAddress = "0x76f86A0a55FB69970af5cB691c41F8bb8b722F52"; // 3.10.2016 11:45AM
-	private String contractAddress = "0xA5f9b79Fc7f067Df25A795685493514A295A8A81"; // 3.10.2016 15:14PM
-	private String contractAddressForTransfers = "0xaf71e622792f47119411ce019f4ca1b8d993496e"; // 3.10.2016 15:14PM
-	private String jsonRpcUrl = "http://big-parity.euro2.ee:8545"; // Parity node on AWS
+//	private String contractAddress = "0xA5f9b79Fc7f067Df25A795685493514A295A8A81"; // 3.10.2016 15:14PM
+//	private String contractAddressForTransfers = "0xaf71e622792f47119411ce019f4ca1b8d993496e"; // 3.10.2016 15:14PM
 
 	private Function approveAccountFunction = Function.fromSignature("approveAccount", "address");
 	private Function appointAccountApproverFunction = Function.fromSignature("appointAccountApprover", "address");
@@ -110,20 +119,12 @@ public class EthereumService {
 		}
 	}
 
-	public String getParityAuthCredentials() throws IOException {
-		File file = new File(System.getProperty("user.home"), ".ParityNodeAuthCreds");
-		try {
-			return toString(new FileInputStream(file));
-		} catch (IOException e) {
-			throw new IOException("Cannot load parity node authentication credentials. Make sure " + file.toString() + " exists and contains the username:password string.\n" + e.toString());
-		}
-	}
-
 	private long getTransactionCount(String account) throws IOException {
 		String result = send(json("eth_getTransactionCount", account, "latest"));
 		return Long.parseLong(without0x(result), 16);
 	}
 
+    /* Deprecated: use wsService API instead */
 	public Long getGasPriceWeiFromNetwork() throws IOException {
 		String result = send(json("eth_gasPrice"));
 		return Long.parseLong(without0x(result), 16);
@@ -142,11 +143,6 @@ public class EthereumService {
 		StringEntity params = new StringEntity(json);
 		request.addHeader("content-type", "application/json");
 		request.setEntity(params);
-
-		byte[] plainCredsBytes = getParityAuthCredentials().getBytes();
-		byte[] base64CredsBytes = Base64.encodeBase64(plainCredsBytes);
-		String base64Creds = new String(base64CredsBytes);
-		request.addHeader("Authorization", "Basic " + base64Creds);
 
 		HttpResponse response = httpClient.execute(request);
 		if (response.getStatusLine().getStatusCode() != 200)
