@@ -37,6 +37,12 @@ ethereum:
 wallet.server.url: http://wallet.euro2.ee:8080
 ref.server.url: http://wallet.euro2.ee:8000/
 
+tomcat:
+  ajp:
+    port: 8009
+    remoteauthentication: false
+    enabled: true
+
 ---
 
 spring:
