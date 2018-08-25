@@ -51,6 +51,6 @@ jobs:
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
               ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no account-identity@id.euro2.ee /bin/mkdir /opt/account-identity/builds/"${CIRCLE_BUILD_NUM}"
               scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -r  build/libs/* account-identity@id.euro2.ee:/opt/account-identity/builds/"${CIRCLE_BUILD_NUM}"/
-              ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no account-identity@id.euro2.ee cd /opt/account-identity; /bin/ln -sf builds/"${CIRCLE_BUILD_NUM}"/*.jar account-identity-latest.jar;
+              echo "cd /opt/account-identity && /bin/ln -sf builds/"${CIRCLE_BUILD_NUM}"/*.jar account-identity-latest.jar" | ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no account-identity@account-identity.euro2.ee
               ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no account-identity@id.euro2.ee /bin/systemctl --user restart account-identity
             fi
