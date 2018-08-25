@@ -28,6 +28,12 @@ import java.io.InputStream;
 import java.util.Scanner;
 import java.io.ByteArrayOutputStream;
 
+import org.springframework.http.HttpEntity;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.web.client.RestTemplate;
+
 import eu.cryptoeuro.accountmapper.response.WalletServerAccountResponse;
 
 import static java.util.Arrays.stream;
@@ -139,16 +145,19 @@ public class EthereumService {
 	}
 
 	private String send(String json) throws IOException {
-		HttpPost request = new HttpPost(jsonRpcUrl);
-		StringEntity params = new StringEntity(json);
-		request.addHeader("content-type", "application/json");
-		request.setEntity(params);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
+        HttpEntity<String> request = new HttpEntity<String>(json, headers);
 
-		HttpResponse response = httpClient.execute(request);
-		if (response.getStatusLine().getStatusCode() != 200)
-			throw new IOException(response.getStatusLine().toString());
-		InputStream stream = response.getEntity().getContent();
-		return resultFromJson(toString(stream));
+        RestTemplate restTemplate = new RestTemplate();
+
+        //T response = restTemplate.postForObject(jsonRpcUrl, request, responseType);
+        ResponseEntity<String> response = restTemplate.postForEntity(jsonRpcUrl, request, String.class);
+        log.info("Call response: " + response.toString());
+
+		if (response.getStatusCodeValue() != 200)
+			throw new IOException(response.getBody());
+		return resultFromJson(response.getBody());
 	}
 
 	private String resultFromJson(String json) throws IOException {
