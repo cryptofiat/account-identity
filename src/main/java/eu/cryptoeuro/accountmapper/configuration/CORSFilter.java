@@ -30,7 +30,7 @@ public class CORSFilter extends GenericFilterBean {
         HttpServletResponse response = (HttpServletResponse) res;
 	HttpServletRequest httprequest = (HttpServletRequest) req;
 
-	String[] allowDomain = {"http://localhost:8100","http://wallet.euro2.ee"};
+	String[] allowDomain = {"http://localhost:8100","http://wallet.euro2.ee","https://wallet.euro2.ee"};
 	Set<String> allowedOrigins = new HashSet<String>(Arrays.asList (allowDomain));
 	String originHeader = httprequest.getHeader("Origin");
 	String allowedResponse = (allowedOrigins.contains(originHeader)) ? originHeader : "*";
